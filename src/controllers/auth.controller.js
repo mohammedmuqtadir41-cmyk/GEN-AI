@@ -6,7 +6,7 @@ const userModel = require("../models/user.model")
  * @access Public
  */
 
-async function registerUserController(res,res){
+async function registerUserController(req,res){
     const {username, email, password} = req.body
 
     if(!username || !email || !password){
