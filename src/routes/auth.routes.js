@@ -10,4 +10,12 @@ const authRouter = Router();
 
 authRouter.post("/register", authController.registerUserController);
 
+/**
+ * @route POST /api/auth/login
+ * @description Login user with email and password
+ * @access Public
+ */
+authRouter.post("/api/login", authController.loginUserController)
+
+
 module.exports = authRouter;
