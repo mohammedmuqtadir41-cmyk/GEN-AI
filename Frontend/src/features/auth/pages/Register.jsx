@@ -1,5 +1,5 @@
 import "../auth.form.scss";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 
@@ -10,6 +10,8 @@ export const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +25,8 @@ export const Register = () => {
       email,
       password,
     });
+
+    navigate("/");
   };
 
   if (loading) {
