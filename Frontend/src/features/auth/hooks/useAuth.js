@@ -1,6 +1,7 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../auth.context";
-import { login, logout, register } from "../Services/auth.api";
+import { login, logout, register, getMe } from "../Services/auth.api";
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -10,7 +11,8 @@ export const useAuth = () => {
     setLoading(true);
     try {
       const data = await login({ email, password });
-      setUser(data.user);
+      const nextUser = data?.user ?? data;
+      setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
     } catch (err) {
       console.log(err);
     } finally {
@@ -22,7 +24,8 @@ export const useAuth = () => {
     setLoading(true);
     try {
       const data = await register({ username, email, password });
-      setUser(data.user);
+      const nextUser = data?.user ?? data;
+      setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
     } catch (err) {
       console.log(err);
     } finally {
@@ -41,6 +44,36 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const getAndSetUser = async () => {
+      try {
+        const data = await getMe();
+
+        if (!isMounted) return;
+
+        const nextUser = data?.user ?? data;
+        setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
+      } catch (err) {
+        console.error("Failed to restore session", err);
+        if (isMounted) {
+          setUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getAndSetUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return { user, loading, handleLogin, handleLogout, handleRegister };
 };

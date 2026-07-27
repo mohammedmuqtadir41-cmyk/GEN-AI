@@ -53,7 +53,7 @@ export const Login = () => {
 
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
-            Login
+            
           </button>
 
           <p className="bottom-text">
