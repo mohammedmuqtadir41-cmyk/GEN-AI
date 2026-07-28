@@ -5,17 +5,23 @@ const userSchema = new mongoose.Schema({
         type:String,
         unique:[true, "username already taken"],
         required:true,
+        lowerCase: true,
+        trim: true,
     },
 
     email:{
         type:String,
         unique:[true,"Account already exists with this email address"],
         required:true,
+        lowerCase: true,
+        trim: true,
     },
 
     password:{
         type:String,
         required:true,
+        lowerCase: true,
+        trim: true,
     }
 })
 
