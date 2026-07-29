@@ -57,13 +57,15 @@ const preparationPlanSchema = new mongoose.Schema(
       required: [true, "Day is required"],
     },
     focus: {
-      type: Number,
+      type: String,
       required: [true, "focus is required"],
     },
-    tasks: [{
-      type: String,
-      required: [true, "Tasks is required"]
-    }],
+    tasks: [
+      {
+        type: String,
+        required: [true, "Tasks is required"],
+      },
+    ],
   },
   {
     _id: false,
@@ -98,7 +100,7 @@ const technicalQuestionSchema = new mongoose.Schema(
     },
     intention: {
       type: String,
-      requird: [true, "Intention is reqired"],
+      required: [true, "Intention is reqired"],
     },
     answer: {
       type: String,
@@ -110,31 +112,41 @@ const technicalQuestionSchema = new mongoose.Schema(
   },
 );
 
-const interviewReportSchema = new mongoose.Schema({
-  jobDesciption: {
-    type: String,
-    required: [true, "job description is required"],
-  },
-  resume: {
-    type: String,
-  },
-  selfDescription: {
-    type: String,
-  },
-  matchScore: {
-    type: Number,
-    min: 0,
-    max: 100,
-  },
+const interviewReportSchema = new mongoose.Schema(
+  {
+    jobDescription: {
+      type: String,
+      required: [true, "job description is required"],
+    },
+    resume: {
+      type: String,
+    },
+    selfDescription: {
+      type: String,
+    },
+    matchScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+    },
 
-  technicalQuestion: [technicalQuestionSchema],
-  behavioralQuestion: [behavioralQuestionSchema],
-  skillsGaps: [skillGapsSchema],
-  preparationPlan: [preparationPlanSchema]
-},{
-    timestamps: true
-});
+    technicalQuestion: [technicalQuestionSchema],
+    behavioralQuestion: [behavioralQuestionSchema],
+    skillsGaps: [skillGapsSchema],
+    preparationPlan: [preparationPlanSchema],
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-const interviewReportModel = mongoose.model("InterviewReport", interviewReportSchema);
+const interviewReportModel = mongoose.model(
+  "InterviewReport",
+  interviewReportSchema,
+);
 
 module.exports = interviewReportModel;

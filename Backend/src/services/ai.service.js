@@ -136,7 +136,7 @@ Rules:
 - Base your analysis only on the provided information.
 - Do not invent experience or skills.
 - Return only valid JSON.
-`;;
+`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3.5-flash",
@@ -147,7 +147,10 @@ Rules:
     },
   });
 
-  console.log(JSON.parse(response.text));
+  const report = console.log(JSON.parse(response.text));
+  console.log(report);
+  return report;
+
 }
 
 module.exports = generateInterviewRepot;
