@@ -147,8 +147,8 @@ Rules:
     },
   });
 
-  const report = console.log(JSON.parse(response.text));
-  console.log(report);
+  const report = JSON.parse(response.text);
+  console.dir(report, {depth: null});
   return report;
 
 }

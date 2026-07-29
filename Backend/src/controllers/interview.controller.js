@@ -1,52 +1,71 @@
 const pdfParse = require("pdf-parse");
-console.log(pdfParse);
-
-
 const generateInterviewReport = require("../services/ai.service");
 const interviewReportModel = require("../models/InterviewRepot.model");
 
 async function generateInterviewReportController(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Resume PDF is required",
+      });
+    }
 
-  const resumeContent = await pdfParse(req.file.buffer);
-  const { selfDescription, jobDescription } = req.body;
+    const resumeContent = await pdfParse(req.file.buffer);
 
-  const interviewReportByAi = await generateInterviewReport({
-    resume: resumeContent.text,
-    selfDescription,
-    jobDescription,
-  });
+    const { selfDescription, jobDescription } = req.body;
 
-  console.log(interviewReportByAi);
+    if (!jobDescription) {
+      return res.status(400).json({
+        message: "Job description is required",
+      });
+    }
 
-//   const interviewReport = await interviewReportModel.create({
-//     user: req.user.id,
-//     jobDescription: jobDescription,
-//     resume: resumeContent.text,
-//     selfDescription,
-//     ...interviewReportByAi,
-//   });
+    const interviewReportByAi = await generateInterviewReport({
+      resume: resumeContent.text,
+      selfDescription,
+      jobDescription,
+    });
 
-const interviewReport = await interviewReportModel.create({
-  user: req.user.id,
-  jobDescription,
-  resume: resumeContent.text,
-  selfDescription,
+    console.dir(interviewReportByAi, { depth: null });
 
-  matchScore: interviewReportByAi.matchScore,
+    //   const interviewReport = await interviewReportModel.create({
+    //     user: req.user.id,
+    //     jobDescription: jobDescription,
+    //     resume: resumeContent.text,
+    //     selfDescription,
+    //     ...interviewReportByAi,
+    //   });
 
-  technicalQuestion: interviewReportByAi.technicalQuestion,
+    const interviewReport = await interviewReportModel.create({
+      user: req.user.id,
+      jobDescription,
+      resume: resumeContent.text,
+      selfDescription,
 
-  behavioralQuestion: interviewReportByAi.behavioralQuestion,
+      matchScore: interviewReportByAi.matchScore,
 
-  skillsGaps: interviewReportByAi.skillsGaps,
+      technicalQuestion: interviewReportByAi.technicalQuestion,
 
-  preparationPlan: interviewReportByAi.preparationPlan,
-});
+      behavioralQuestion: interviewReportByAi.behavioralQuestion,
 
-  res.status(201).json({
-    message: "Interview report generated successfully",
-    interviewReport,
-  });
+      skillsGaps: interviewReportByAi.skillsGaps,
+
+      preparationPlan: interviewReportByAi.preparationPlan,
+    });
+
+    res.status(201).json({
+      message: "Interview report generated successfully",
+      interviewReport,
+    });
+  } catch (error) {
+    console.error("Interview Controller Error");
+    console.error(error);
+
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
 }
 
 module.exports = { generateInterviewReportController };
