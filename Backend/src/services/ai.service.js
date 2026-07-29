@@ -60,7 +60,7 @@ const interviewReportSchema = z.object({
     .array(
       z.object({
         skill: z.string().describe("The skill that the candidate is lacking"),
-        severity: z.string().describe("The severity of the skill gap"),
+        severity: z.enum(["low", "medium", "high"]),
       }),
     )
     .describe(
@@ -139,7 +139,7 @@ Rules:
 `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: "gemini-2.5-flash",
     contents: prompt,
     config: {
       responseMimeType: "application/json",
