@@ -20,7 +20,6 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true,
-        lowerCase: true,
         trim: true,
     }
 })

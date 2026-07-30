@@ -34,8 +34,8 @@ authRouter.get("/logout", authController.logoutUserController);
 
 authRouter.get("/get-me", authMiddleware.authUser, authController.getMeController);
 
-async function getMeController(req, res) {
-  const user = await userModel.findById(req.user.id);
-}
+// async function getMeController(req, res) {
+//   const user = await userModel.findById(req.user.id);
+// }
 
 module.exports = authRouter;

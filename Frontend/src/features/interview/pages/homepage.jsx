@@ -10,20 +10,30 @@ import {
   FaSpinner,
 } from "react-icons/fa";
 import "../style/Home.scss";
+import { useInterview } from "../hooks/useInterview";
+import { useNavigate } from "react-router";
 
 const Home = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [resume, setResume] = useState(null);
   const [selfDescription, setSelfDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const navigate = useNavigate();
+
+  const {
+    generateReport,
+    loading,
+    error: apiError,
+  } = useInterview({ autoFetch: false });
 
   const processFile = (file) => {
     if (file) {
       if (file.name.match(/\.(pdf|doc|docx)$/i)) {
         setResume(file);
       } else {
-        alert("Please upload a PDF or DOCX file.");
+        setFormError("Please upload a PDF or DOCX file.");
       }
     }
   };
@@ -43,19 +53,38 @@ const Home = () => {
     if (e.dataTransfer.files?.[0]) processFile(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!jobDescription.trim() || (!resume && !selfDescription.trim())) return;
+    setFormError(null);
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert("Generating Interview Strategy... 🚀");
-    }, 2000);
+    if (!jobDescription.trim()) {
+      setFormError("Job description is required.");
+      return;
+    }
+
+    if (!resume && !selfDescription.trim()) {
+      setFormError("Please provide a resume or a self description.");
+      return;
+    }
+
+    const report = await generateReport({
+      jobDescription,
+      selfDescription,
+      resumeFile: resume,
+    });
+
+    if (!report?._id) {
+      setFormError(
+        "Unable to generate interview strategy. Please check your inputs and try again.",
+      );
+      return;
+    }
+
+    navigate(`/interview/${report._id}`);
   };
 
   const isFormValid = Boolean(
-    jobDescription.trim() && (resume || selfDescription.trim())
+    jobDescription.trim() && (resume || selfDescription.trim()),
   );
 
   return (
@@ -66,8 +95,8 @@ const Home = () => {
           Create Your Custom <span>Interview Plan</span>
         </h1>
         <p>
-          Let our AI analyze the job requirements and your unique profile to build
-          a winning strategy.
+          Let our AI analyze the job requirements and your unique profile to
+          build a winning strategy.
         </p>
       </header>
 
@@ -181,6 +210,10 @@ const Home = () => {
 
           {/* Card Footer */}
           <div className="card-footer">
+            {formError && <div className="form-error">{formError}</div>}
+            {!formError && apiError && (
+              <div className="form-error">{apiError}</div>
+            )}
             <span className="approx-time">
               AI-Powered Strategy Generation • Approx 30s
             </span>

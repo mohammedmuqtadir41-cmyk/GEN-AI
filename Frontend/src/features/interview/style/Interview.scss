@@ -1,0 +1,438 @@
+@use "sass:color";
+
+$bg: #050816;
+$glass: rgba(17, 24, 39, 0.72);
+$border: rgba(255, 255, 255, 0.08);
+$input: #111b2f;
+$input-border: #24324a;
+$primary: #00e5ff;
+$primary-2: #3b82f6;
+$secondary: #7c3aed;
+$white: #f8fafc;
+$muted: #94a3b8;
+$dim: #64748b;
+$success: #22c55e;
+$warning: #f59e0b;
+$danger: #ef4444;
+$gradient: linear-gradient(135deg, #00e5ff, #3b82f6, #7c3aed);
+
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  background: $bg;
+  color: $white;
+  text-align: center;
+  padding: 20px;
+}
+
+.error-state p {
+  color: $muted;
+  margin: 12px 0 24px;
+}
+
+.button.primary-button {
+  border: none;
+  background: $gradient;
+  color: white;
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: 0.3s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 229, 255, 0.25);
+  }
+}
+
+.interview-page {
+  min-height: 100vh;
+  background: $bg;
+  color: $white;
+  padding: 24px;
+}
+
+.interview-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 240px 1px 1fr 1px 300px;
+  gap: 28px;
+  align-items: start;
+}
+
+.interview-divider {
+  align-self: stretch;
+  width: 1px;
+  background: $border;
+}
+
+/* ── Left Nav ── */
+.interview-nav {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: $glass;
+  border: 1px solid $border;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.nav-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.interview-nav__label {
+  color: $dim;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  padding: 0 12px;
+}
+
+.interview-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  color: $muted;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: 0.25s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: $white;
+  }
+
+  &--active {
+    background: rgba(0, 229, 255, 0.12);
+    color: $primary;
+  }
+}
+
+.interview-nav__icon {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Center Content ── */
+.interview-content {
+  min-width: 0;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+}
+
+.content-header__count {
+  color: $dim;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: $input;
+  border: 1px solid $input-border;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.q-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.q-card {
+  background: $glass;
+  border: 1px solid $border;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.25s;
+
+  &:hover {
+    border-color: rgba(0, 229, 255, 0.25);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    cursor: pointer;
+  }
+
+  &__index {
+    flex-shrink: 0;
+    color: $primary;
+    font-weight: 800;
+    font-size: 0.85rem;
+    background: rgba(0, 229, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+
+  &__question {
+    flex: 1;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    color: $dim;
+    display: flex;
+    transition: transform 0.25s;
+
+    &--open {
+      transform: rotate(180deg);
+      color: $primary;
+    }
+  }
+
+  &__body {
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__section p {
+    color: $muted;
+    line-height: 1.7;
+    margin-top: 8px;
+  }
+
+  &__tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 999px;
+
+    &--intention {
+      color: $secondary;
+      background: rgba(124, 58, 237, 0.15);
+    }
+
+    &--answer {
+      color: $success;
+      background: rgba(34, 197, 94, 0.15);
+    }
+  }
+}
+
+/* ── Roadmap ── */
+.roadmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roadmap-day {
+  background: $glass;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 20px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  &__badge {
+    flex-shrink: 0;
+    background: $gradient;
+    color: white;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+
+  &__focus {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  &__tasks {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: $muted;
+      line-height: 1.6;
+    }
+  }
+
+  &__bullet {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    margin-top: 8px;
+    border-radius: 50%;
+    background: $primary;
+  }
+}
+
+/* ── Right Sidebar ── */
+.interview-sidebar {
+  position: sticky;
+  top: 24px;
+  background: $glass;
+  border: 1px solid $border;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: $border;
+}
+
+.match-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+
+  &__label {
+    color: $dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__ring {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    border: 6px solid $input-border;
+
+    &.score--high { border-color: $success; }
+    &.score--mid { border-color: $warning; }
+    &.score--low { border-color: $danger; }
+  }
+
+  &__value {
+    font-size: 2rem;
+    font-weight: 900;
+  }
+
+  &__pct {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $muted;
+  }
+
+  &__sub {
+    color: $muted;
+    font-size: 0.85rem;
+  }
+}
+
+.skill-gaps {
+  &__label {
+    color: $dim;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.skill-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  &--low {
+    color: $success;
+    background: rgba(34, 197, 94, 0.12);
+  }
+
+  &--medium {
+    color: $warning;
+    background: rgba(245, 158, 11, 0.12);
+  }
+
+  &--high {
+    color: $danger;
+    background: rgba(239, 68, 68, 0.12);
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .interview-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .interview-divider {
+    display: none;
+  }
+
+  .interview-nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nav-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .interview-sidebar {
+    position: static;
+  }
+}
