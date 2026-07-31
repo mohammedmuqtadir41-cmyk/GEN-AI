@@ -9,7 +9,7 @@ const ai = new GoogleGenAI({
 const interviewReportSchema = z.object({
   matchScore: z
     .number()
-    .describe("The match score between the candidate and the job describe"),
+    .describe("The match score between the candidate and the job description"),
   technicalQuestion: z
     .array(
       z.object({
@@ -84,6 +84,13 @@ const interviewReportSchema = z.object({
     .describe(
       "The actions that the candidate should take to improve the skill gap along with the resources that the candidate can use to improve the skill gap",
     ),
+  // technicalQuestions: z.array(technicalQuestionSchema).length(5),
+
+  // behavioralQuestions: z.array(behavioralQuestionSchema).length(5),
+
+  // skillGaps: z.array(skillGapSchema),
+
+  // preparationPlan: z.array(preparationDaySchema).length(7),
 });
 
 async function generateInterviewRepot({
@@ -135,7 +142,42 @@ Rules:
   - tasks
 - Base your analysis only on the provided information.
 - Do not invent experience or skills.
-- Return only valid JSON.
+- Return ONLY a JSON object matching EXACTLY this structure.
+
+{
+  "matchScore": 75,
+  "technicalQuestion": [
+    {
+      "question": "...",
+      "intention": "...",
+      "answer": "..."
+    }
+  ],
+  "behavioralQuestion":[
+    {
+      "question":"...",
+      "intention":"...",
+      "answer":"..."
+    }
+  ],
+  "skillsGaps":[
+    {
+      "skill":"...",
+      "severity":"high"
+    }
+  ],
+  "preparationPlan":[
+    {
+      "day":1,
+      "focus":"...",
+      "tasks":["...","..."]
+    }
+  ]
+}
+
+Do not return markdown.
+Do not flatten arrays.
+Do not omit properties.
 `;
 
   const response = await ai.models.generateContent({
@@ -143,14 +185,14 @@ Rules:
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: zodToJsonSchema(interviewReportSchema),
+      // responseJsonSchema: zodToJsonSchema(interviewReportSchema),
     },
   });
 
-  const report = JSON.parse(response.text);
-  console.dir(report, {depth: null});
+  console.log(response.text);
+  const report = interviewReportSchema.parse(JSON.parse(response.text));
+  console.dir(report, { depth: null });
   return report;
-
 }
 
 module.exports = generateInterviewRepot;

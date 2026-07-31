@@ -59,6 +59,8 @@ function buildSimplePdf(title, body) {
 async function generateInterviewReportController(req, res) {
   try {
     const { selfDescription, jobDescription } = req.body;
+    console.log(selfDescription);
+    console.log(jobDescription);
 
     if (!jobDescription) {
       return res.status(400).json({
