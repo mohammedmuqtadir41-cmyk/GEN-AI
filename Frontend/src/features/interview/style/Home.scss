@@ -452,3 +452,168 @@ textarea:focus {
     justify-content: center;
   }
 }
+.previous-reports {
+  width: min(1200px, 92%);
+  margin: 5rem auto;
+}
+
+.section-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  p {
+    color: rgba(255,255,255,.7);
+    margin-top: .35rem;
+  }
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(340px,1fr));
+  gap: 24px;
+}
+
+.report-card{
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+
+  backdrop-filter: blur(18px);
+
+  border-radius:20px;
+
+  padding:24px;
+
+  transition:.25s ease;
+
+  display:flex;
+  flex-direction:column;
+}
+
+.report-card:hover{
+
+  transform:translateY(-6px);
+
+  border-color:#8b5cf6;
+
+  box-shadow:
+      0 15px 40px rgba(139,92,246,.2);
+}
+
+.report-card-header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:flex-start;
+
+  margin-bottom:18px;
+}
+
+.report-card-header h3{
+
+  color:white;
+
+  font-size:1.15rem;
+
+  margin-bottom:6px;
+}
+
+.report-date{
+
+  color:#9ca3af;
+
+  font-size:.9rem;
+}
+
+.report-score{
+
+  width:58px;
+
+  height:58px;
+
+  border-radius:50%;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  background:linear-gradient(
+      135deg,
+      #ec4899,
+      #8b5cf6
+  );
+
+  color:white;
+
+  font-weight:700;
+}
+
+.skill-gap-preview{
+
+    margin-bottom:20px;
+}
+
+.skill-gap-preview h4{
+
+    color:#d1d5db;
+
+    margin-bottom:12px;
+
+    font-size:.9rem;
+}
+
+.skill-tags{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+}
+
+.skill-tag{
+
+    padding:7px 12px;
+
+    border-radius:999px;
+
+    background:#1f2937;
+
+    color:#e5e7eb;
+
+    font-size:.8rem;
+}
+
+.view-report-btn{
+
+    margin-top:auto;
+
+    background:transparent;
+
+    border:1px solid rgba(255,255,255,.12);
+
+    color:white;
+
+    border-radius:12px;
+
+    padding:12px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.view-report-btn:hover{
+
+    background:#8b5cf6;
+
+    border-color:#8b5cf6;
+}

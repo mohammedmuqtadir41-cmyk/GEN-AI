@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FaBriefcase,
   FaUser,
@@ -19,14 +19,17 @@ const Home = () => {
   const [selfDescription, setSelfDescription] = useState("");
   const [formError, setFormError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const resumeInputRef = useRef();
 
   const navigate = useNavigate();
 
   const {
     generateReport,
+    reports,
+    getReports,
     loading,
     error: apiError,
-  } = useInterview({ autoFetch: false });
+  } = useInterview();
 
   const processFile = (file) => {
     if (file) {
@@ -86,6 +89,12 @@ const Home = () => {
   const isFormValid = Boolean(
     jobDescription.trim() && (resume || selfDescription.trim()),
   );
+
+  useEffect(()=> {
+    getReports();
+  }, [getReports]);
+
+  
 
   return (
     <main className="home">
@@ -155,6 +164,7 @@ const Home = () => {
                     <p>Click to upload or drag & drop</p>
                     <small>PDF or DOCX (Max 5MB)</small>
                     <input
+                      ref={resumeInputRef}
                       id="resume-upload"
                       type="file"
                       accept=".pdf,.doc,.docx"
@@ -235,6 +245,72 @@ const Home = () => {
           </div>
         </form>
       </div>
+
+      {/* Previous Reports */}
+
+      <section className="previous-reports">
+        <div className="section-header">
+          <h2>Previous Interview Reports</h2>
+          <p>Continue where you left off</p>
+        </div>
+
+        {reports.length === 0 ? (
+          <div className="empty-state">
+            <p>You haven't genereated any interview reports yet</p>
+          </div>
+        ) : (
+          <div className="reports-grid">
+
+            {reports.map((report) => (
+              <div key={report._id} className="report-card">
+                <div className="report-card-header">
+                  <div>
+                    <h3>{report.jobTitle || "Interview Report"}</h3>
+
+                    <p className="report-date">
+                      {new Date(report.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="report-score">
+                    {report.matchScore  ?? "--"}%
+                  </div>
+                </div>
+
+                {report.skillGaps?.length > 0 && (
+                  <div className="skill-gap-preview">
+                    <h4>Missing Skills</h4>
+                    <div className="skill-tags">
+                      {report.skillGaps.slice(0,3).map((gap, index) => {
+                        <span key = {index} className="skill-tag">
+                          {gap.skill}
+                        </span>
+                      })}
+
+                      {report.skillGaps.length > 3 && (
+                        <span className="skill-tag more">
+                          +{report.skillGaps.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <button className="view-report-btn"
+                onClick={() => navigate(`/interview/${report._id}`)}>
+                  View Report →
+                </button>
+                </div>  
+            ))}
+          </div>
+        )}
+
+
+        
+      </section>
+
+      
+     
 
       {/* Footer Navigation */}
       <footer className="page-footer">
