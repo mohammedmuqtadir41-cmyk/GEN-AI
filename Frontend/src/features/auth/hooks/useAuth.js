@@ -27,7 +27,8 @@ export const useAuth = () => {
       const nextUser = data?.user ?? data;
       setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      throw err;
     } finally {
       setLoading(false);
     }

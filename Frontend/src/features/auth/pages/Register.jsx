@@ -20,6 +20,8 @@ export const Register = () => {
       console.log("Passwords do not match");
       return;
     }
+
+    try{
     await handleRegister({
       username,
       email,
@@ -27,6 +29,9 @@ export const Register = () => {
     });
 
     navigate("/");
+  } catch(err){
+    console.error(err)
+  }
   };
 
   if (loading) {
