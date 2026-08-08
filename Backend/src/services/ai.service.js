@@ -185,7 +185,7 @@ Do not omit properties.
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      // responseJsonSchema: zodToJsonSchema(interviewReportSchema),
+      responseJsonSchema: zodToJsonSchema(interviewReportSchema),
     },
   });
 

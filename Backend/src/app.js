@@ -10,6 +10,12 @@ app.use(cors({origin:"http://localhost:5173",
     credentials:true
 }))
 
+app.use((req, res, next) => {
+  console.log("Request:", req.method, req.originalUrl);
+  console.log("Origin:", req.headers.origin);
+  next();
+});
+
 // require all the routes here
 const authRouter = require("./routes/auth.routes")
 const interviewRouter = require("./routes/interview.routes")
