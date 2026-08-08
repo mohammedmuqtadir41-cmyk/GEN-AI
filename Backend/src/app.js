@@ -18,10 +18,13 @@ app.use((req, res, next) => {
 
 // require all the routes here
 const authRouter = require("./routes/auth.routes")
-const interviewRouter = require("./routes/interview.routes")
+const interviewRouter = require("./routes/interview.routes");
+const { AppErr } = require("./middlewears/error.middleware");
 
 // using all the routes here
 app.use("/api/auth", authRouter)
 app.use("/api/interview", interviewRouter)
+
+app.use(AppErr);
 
 module.exports = app;
