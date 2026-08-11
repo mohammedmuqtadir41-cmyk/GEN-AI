@@ -203,7 +203,7 @@ const nextQuestionSchema = z.object({
     ),
 });
 
-function generateOpeningMockQuestion({ interviewReport }) {
+async function generateOpeningMockQuestion({ interviewReport }) {
   const prompt = `You are a Senior Technical Interviewer about to start a live mock interview.
 
   Job Description: 
@@ -232,20 +232,18 @@ function generateOpeningMockQuestion({ interviewReport }) {
 }
 
 `;
-const reponse = ai.models.generateContent({
-  model: "gemini-3.5-flash",
-  contents: prompt,
-  config: {
-    responseJsonSchema: zodToJsonSchema,
-    responseMimeType: "application/json",
-  },
-});
+  const response = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseJsonSchema: zodToJsonSchema(nextQuestionSchema),
+    },
+  });
 
-const {question} = nextQuestionSchema.parse(
-  json.parse(response.text),
-);
+  const { question } = nextQuestionSchema.parse(JSON.parse(response.text));
 
-return question;
+  return question;
 }
 
-module.exports = generateInterviewRepot;
+module.exports = { generateInterviewRepot, generateOpeningMockQuestion };
