@@ -195,4 +195,57 @@ Do not omit properties.
   return report;
 }
 
+const nextQuestionSchema = z.object({
+  question: z
+    .string()
+    .describe(
+      "The interview question to ask to the candidate.  Must not repeat any question already asked in this session.",
+    ),
+});
+
+function generateOpeningMockQuestion({ interviewReport }) {
+  const prompt = `You are a Senior Technical Interviewer about to start a live mock interview.
+
+  Job Description: 
+  ${interviewReport.jobDescription}
+
+  Candidate Background: 
+  ${interviewReport.resume || interviewReport.selfDescription || "Not provided"}
+
+  known Skill Gaps:
+  ${JSON.stringify(interviewReport.skillsGaps || [])}
+
+  Task: 
+  Ask one opening interview Question to the candidate to start the mock interview
+
+  The question should: 
+  -Be relevant to the job description
+  - Be relevant to the candidate's background.
+  - Feel like a real interview question.
+  - Start the interview naturally.
+  - Not ask multiple questions at once.
+
+  Return ONLY a JSON object matching this structure:
+
+{
+  "question": "..."
+}
+
+`;
+const reponse = ai.models.generateContent({
+  model: "gemini-3.5-flash",
+  contents: prompt,
+  config: {
+    responseJsonSchema: zodToJsonSchema,
+    responseMimeType: "application/json",
+  },
+});
+
+const {question} = nextQuestionSchema.parse(
+  json.parse(response.text),
+);
+
+return question;
+}
+
 module.exports = generateInterviewRepot;

@@ -58,3 +58,5 @@ const interviewSessionModel = mongoose.model(
   "interviewSession",
   interviewSessionSchema,
 );
+
+module.exports = interviewSessionModel;

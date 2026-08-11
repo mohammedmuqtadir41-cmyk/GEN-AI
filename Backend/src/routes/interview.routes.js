@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddlewear = require("../middlewears/auth.middleware");
 const interviewController = require("../controllers/interview.controller");
 const upload = require("../middlewears/file.middlewear");
+const interviewSessionController = require("../controllers/interviewSession.controller");
 
 const interviewRouter = express.Router();
 
@@ -15,6 +16,18 @@ interviewRouter.post(
   authMiddlewear.authUser,
   upload.single("resume"),
   interviewController.generateInterviewReportController,
+);
+
+/**
+ * @route   POST /api/interview/session
+ * @description create a new mock interview session for an existing interview report
+ * @access  private
+ */
+
+interviewRouter.post(
+  "/session",
+  authMiddlewear.authUser,
+  interviewSessionController,
 );
 
 /**
