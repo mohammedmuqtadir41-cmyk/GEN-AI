@@ -246,4 +246,82 @@ async function generateOpeningMockQuestion({ interviewReport }) {
   return question;
 }
 
-module.exports = { generateInterviewRepot, generateOpeningMockQuestion };
+const answerEvaluationSchema = z.object({
+  score: z
+    .number()
+    .min(0)
+    .max(10)
+    .describe("Score the candidate's answer from 0 to 10"),
+  feedback: z
+    .string()
+    .describe("Constructive feedback about the candidate's answer"),
+  strengths: z
+    .array(z.string())
+    .describe("Spcific things that candidate did well"),
+  improvements: z
+    .array(z.string())
+    .describe("Specific things the candidate need to improve"),
+});
+
+async function evaluateInterviewAnswer({ question, answer, interviewReport }) {
+  const prompt = `
+  You are a Senior Technical Interviewer evaluating a candidate's answer.
+
+  Job Description: 
+  ${interviewReport.jobDescription}
+
+  Candidate Background: 
+  ${interviewReport.resume || interviewReport.selfDescription || "Not provided"}
+
+  Interview Question: 
+  ${question}
+
+  Candidate's Answer:
+  ${answer}
+
+  Evaluate the candidate's answer.
+
+  Consider:
+- Technical correctness
+- Relevance to the question
+- Clarity of explanation
+- Depth of understanding
+- Practical reasoning
+- Whether the answer is supported by the candidate's background
+
+Give a fair score from 0 to 10.
+
+Do not penalize the candidate simply because the answer is short.
+Do not invent information about the candidate.
+
+Return only a JSON object matching this structure
+{
+"score": 8,
+"feedback":"....",
+"strengths":["...","..."],
+"improvement": ["...","..."]
+}
+
+Do not return a markdown
+
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseJsonSchema: zodToJsonSchema(answerEvaluationSchema),
+    },
+  });
+
+  const evaluation = answerEvaluationSchema.parse(JSON.parse(response.text));
+
+  return evaluation;
+}
+
+module.exports = {
+  generateInterviewRepot,
+  generateOpeningMockQuestion,
+  evaluateInterviewAnswer,
+};
