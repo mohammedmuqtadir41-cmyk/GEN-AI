@@ -1,6 +1,6 @@
 const interviewReportModel = require("../models/InterviewRepot.model");
 const interviewSessionModel = require("../models/InterviewSession");
-const { generateOpeningMockQuestion } = require("../services/ai.service");
+const { generateOpeningMockQuestion, evaluateInterviewAnswer } = require("../services/ai.service");
 
 async function interviewSessionController(req, res) {
   try {
@@ -37,8 +37,8 @@ async function interviewSessionController(req, res) {
           question: openingQuestion,
           answer: "",
           fedback: "",
-        }
-      ]
+        },
+      ],
     });
 
     res.status(201).json({
@@ -56,4 +56,83 @@ async function interviewSessionController(req, res) {
   }
 }
 
-module.exports = interviewSessionController;
+async function submitInterviewAnswerController(req, res) {
+  try {
+    const { sessionId } = req.params;
+    const { answer } = req.body;
+
+    if (!answer || !answer.trim()) {
+      return res.status(400).json({
+        message: "Answer is required",
+      });
+    }
+
+    const interviewSession = await interviewSessionModel.findOne({
+      _id: sessionId,
+      user: req.user.id,
+    });
+
+    if (!interviewSession) {
+      return res.status(404).json({
+        message: "Interview session not found",
+      });
+    }
+
+    if (interviewSession.status !== "active") {
+      return res.status(400).json({
+        message: "Interview session is not active",
+      });
+    }
+
+    const currentQuestion = interviewSession.currentQuestion;
+
+    if (!currentQuestion) {
+      return res.status(400).json({
+        message: "No current question found",
+      });
+    }
+
+    const interviewReport = await interviewReportModel.findOne({
+      _id: interviewSession.interviewReport,
+      user: req.user.id,
+    });
+
+    if (!interviewReport) {
+      return res.status(404).json({
+        message: "Interview report not found",
+      });
+    }
+
+    const evaluation = await evaluateInterviewAnswer({
+      question: currentQuestion,
+      answer,
+      interviewReport,
+    });
+
+    const currentQuestionEntry =
+      interviewSession.questionsAsked[
+        interviewSession.questionsAsked.length - 1
+      ];
+
+    currentQuestionEntry.answer = answer;
+    currentQuestionEntry.feedback = evaluation.feedback;
+
+    await interviewSession.save();
+
+    return res.status(200).json({
+      message: "Answer evaluated successfully",
+      evaluation,
+      interviewSession,
+    });
+  } catch (error) {
+    console.error("Submit Interview Answer Error");
+    console.error(error);
+
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
+module.exports = {interviewSessionController, submitInterviewAnswerController};

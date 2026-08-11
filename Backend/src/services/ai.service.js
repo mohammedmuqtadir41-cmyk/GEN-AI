@@ -299,7 +299,7 @@ Return only a JSON object matching this structure
 "score": 8,
 "feedback":"....",
 "strengths":["...","..."],
-"improvement": ["...","..."]
+"improvements": ["...","..."]
 }
 
 Do not return a markdown
