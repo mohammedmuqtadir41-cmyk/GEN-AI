@@ -96,6 +96,7 @@ res.cookie("token", token, {
 })
 res.status(200).json({
     message: "User LoggedIn Successfully",
+    token,
     user: {
         id: user._id,
         username: user.username,

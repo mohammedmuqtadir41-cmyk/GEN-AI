@@ -93,7 +93,7 @@ const interviewReportSchema = z.object({
   // preparationPlan: z.array(preparationDaySchema).length(7),
 });
 
-async function generateInterviewRepot({
+async function generateInterviewReport({
   resume,
   selfDescription,
   jobDescription,
@@ -358,6 +358,8 @@ The next question should:
 - Progress the interview naturally.
 - Explore a different relevant skill, concept, experience, or weakness.
 - Use previous answers and feedback to identify areas that need deeper evaluation when appropriate.
+- If the previous answer reveals a weak area, ask a follow-up question only when deeper evaluation of that same topic is useful.
+- Otherwise move naturally to another relevant topic.
 - Ask only one question.
 - Feel like a real interviewer continuing the same interview.
 
@@ -387,7 +389,7 @@ Do not add extra fields.
 
 
 module.exports = {
-  generateInterviewRepot,
+  generateInterviewReport,
   generateOpeningMockQuestion,
   evaluateInterviewAnswer,
   generateNextQuestion,

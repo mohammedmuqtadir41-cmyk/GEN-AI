@@ -1,6 +1,6 @@
 const interviewReportModel = require("../models/InterviewRepot.model");
 const interviewSessionModel = require("../models/InterviewSession");
-const { generateOpeningMockQuestion, evaluateInterviewAnswer } = require("../services/ai.service");
+const { generateOpeningMockQuestion, evaluateInterviewAnswer, generateNextQuestion } = require("../services/ai.service");
 
 async function interviewSessionController(req, res) {
   try {
@@ -36,7 +36,7 @@ async function interviewSessionController(req, res) {
         {
           question: openingQuestion,
           answer: "",
-          fedback: "",
+          feedback: "",
         },
       ],
     });
@@ -109,6 +109,7 @@ async function submitInterviewAnswerController(req, res) {
       interviewReport,
     });
 
+   
     const currentQuestionEntry =
       interviewSession.questionsAsked[
         interviewSession.questionsAsked.length - 1
@@ -116,6 +117,22 @@ async function submitInterviewAnswerController(req, res) {
 
     currentQuestionEntry.answer = answer;
     currentQuestionEntry.feedback = evaluation.feedback;
+    currentQuestionEntry.score = evaluation.score;
+
+     const nextQuestion = await generateNextQuestion({
+      interviewReport,
+      questionsAsked:  interviewSession.questionsAsked,
+    })
+
+    interviewSession.questionsAsked.push({
+      question: nextQuestion,
+      answer: "",
+      feedback: '',
+    }); 
+
+    interviewSession.currentQuestion = nextQuestion;
+
+    // await interviewSession.save();
 
     await interviewSession.save();
 
