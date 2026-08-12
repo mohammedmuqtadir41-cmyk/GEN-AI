@@ -195,11 +195,11 @@ Do not omit properties.
   return report;
 }
 
-const nextQuestionSchema = z.object({
+const openingQuestionSchema = z.object({
   question: z
     .string()
     .describe(
-      "The interview question to ask to the candidate.  Must not repeat any question already asked in this session.",
+      "The Opening interview question to ask to the candidate.",
     ),
 });
 
@@ -237,11 +237,11 @@ async function generateOpeningMockQuestion({ interviewReport }) {
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: zodToJsonSchema(nextQuestionSchema),
+      responseJsonSchema: zodToJsonSchema(openingQuestionSchema),
     },
   });
 
-  const { question } = nextQuestionSchema.parse(JSON.parse(response.text));
+  const { question } = openingQuestionSchema.parse(JSON.parse(response.text));
 
   return question;
 }
@@ -320,8 +320,75 @@ Do not return a markdown
   return evaluation;
 }
 
+const nextQuestionSchema = z.object({
+  question: z.string().describe("The interview question to ask to the candidate. Must not repeat any question already asked in this session.")
+})
+
+async function generateNextQuestion({interviewReport, questionsAsked}){
+  const prompt = `You are a Senior Technical Interviewer conducting a live mock interview.
+
+Job Description:
+${interviewReport.jobDescription}
+
+Candidate Background:
+${interviewReport.resume || interviewReport.selfDescription || "Not provided"}
+
+Known Skill Gaps:
+${JSON.stringify(interviewReport.skillsGaps || [])}
+
+Questions Already Asked:
+${JSON.stringify(
+  questionsAsked.map((item) => ({
+    question: item.question,
+    answer: item.answer,
+    feedback: item.feedback,
+  }))
+)}
+
+Task:
+Generate the next interview question for the candidate.
+
+Use the candidate's previous answers and feedback to decide what should be asked next.
+
+The next question should:
+
+- Be relevant to the job description.
+- Be appropriate for the candidate's background.
+- Not repeat or closely duplicate any previously asked question.
+- Progress the interview naturally.
+- Explore a different relevant skill, concept, experience, or weakness.
+- Use previous answers and feedback to identify areas that need deeper evaluation when appropriate.
+- Ask only one question.
+- Feel like a real interviewer continuing the same interview.
+
+Return ONLY a JSON object matching this structure:
+
+{
+  "question": "..."
+}
+
+Do not return markdown.
+Do not add extra fields.
+`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType:  "application/json",
+      responseJsonSchema: zodToJsonSchema(nextQuestionSchema),
+    },
+  });
+
+  const {question } = nextQuestionSchema.parse(JSON.parse(response.text));
+
+  return question;
+}
+
+
 module.exports = {
   generateInterviewRepot,
   generateOpeningMockQuestion,
   evaluateInterviewAnswer,
+  generateNextQuestion,
 };
