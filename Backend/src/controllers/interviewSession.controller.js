@@ -1,6 +1,10 @@
 const interviewReportModel = require("../models/InterviewRepot.model");
 const interviewSessionModel = require("../models/InterviewSession");
-const { generateOpeningMockQuestion, evaluateInterviewAnswer, generateNextQuestion } = require("../services/ai.service");
+const {
+  generateOpeningMockQuestion,
+  evaluateInterviewAnswer,
+  generateNextQuestion,
+} = require("../services/ai.service");
 
 async function interviewSessionController(req, res) {
   try {
@@ -67,6 +71,12 @@ async function submitInterviewAnswerController(req, res) {
       });
     }
 
+    if (answer.trim().length < 10) {
+      return res.status(400).json({
+        message: "Answer must be at least 10 characters long",
+      });
+    }
+
     const interviewSession = await interviewSessionModel.findOne({
       _id: sessionId,
       user: req.user.id,
@@ -109,7 +119,6 @@ async function submitInterviewAnswerController(req, res) {
       interviewReport,
     });
 
-   
     const currentQuestionEntry =
       interviewSession.questionsAsked[
         interviewSession.questionsAsked.length - 1
@@ -119,16 +128,16 @@ async function submitInterviewAnswerController(req, res) {
     currentQuestionEntry.feedback = evaluation.feedback;
     currentQuestionEntry.score = evaluation.score;
 
-     const nextQuestion = await generateNextQuestion({
+    const nextQuestion = await generateNextQuestion({
       interviewReport,
-      questionsAsked:  interviewSession.questionsAsked,
-    })
+      questionsAsked: interviewSession.questionsAsked,
+    });
 
     interviewSession.questionsAsked.push({
       question: nextQuestion,
       answer: "",
-      feedback: '',
-    }); 
+      feedback: "",
+    });
 
     interviewSession.currentQuestion = nextQuestion;
 
@@ -152,4 +161,7 @@ async function submitInterviewAnswerController(req, res) {
   }
 }
 
-module.exports = {interviewSessionController, submitInterviewAnswerController};
+module.exports = {
+  interviewSessionController,
+  submitInterviewAnswerController,
+};
