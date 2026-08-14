@@ -161,7 +161,48 @@ async function submitInterviewAnswerController(req, res) {
   }
 }
 
+async function completeInterviewSessionController(req, res) {
+  try {
+    const { sessionId } = req.params;
+
+    const interviewSession = await interviewSessionModel.findOne({
+      _id: sessionId,
+      user: req.user.id,
+    });
+
+    if (!interviewSession) {
+      return res.status(404).json({
+        message: "Interview session not found",
+      });
+    }
+
+    if (interviewSession.status === "completed") {
+      return res.status(400).json({
+        message: "Interview session is already completed",
+      });
+    }
+
+    interviewSession.status = "completed";
+
+    await interviewSession.save();
+
+    return res.status(200).json({
+      message: "Interview session completed successfully",
+      interviewSession,
+    });
+  } catch (error) {
+    console.error("Complete Interview Session Error");
+    console.error(error);
+
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
 module.exports = {
   interviewSessionController,
   submitInterviewAnswerController,
+  completeInterviewSessionController
 };
