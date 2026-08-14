@@ -2,7 +2,12 @@ const express = require("express");
 const authMiddlewear = require("../middlewears/auth.middleware");
 const interviewController = require("../controllers/interview.controller");
 const upload = require("../middlewears/file.middlewear");
-const {interviewSessionController, submitInterviewAnswerController, completeInterviewSessionController  } = require("../controllers/interviewSession.controller");
+const {
+  interviewSessionController,
+  submitInterviewAnswerController,
+  completeInterviewSessionController,
+  getInterviewSessionSummaryController,
+} = require("../controllers/interviewSession.controller");
 
 const interviewRouter = express.Router();
 
@@ -31,13 +36,21 @@ interviewRouter.post(
 );
 
 interviewRouter.post(
-  "/session/:sessionId/answer", authMiddlewear.authUser, submitInterviewAnswerController
-)
+  "/session/:sessionId/answer",
+  authMiddlewear.authUser,
+  submitInterviewAnswerController,
+);
 
 interviewRouter.patch(
   "/session/:sessionId/complete",
   authMiddlewear.authUser,
-  completeInterviewSessionController
+  completeInterviewSessionController,
+);
+
+interviewRouter.get(
+  "/session/:sessionId/summary",
+  authMiddlewear.authUser,
+  getInterviewSessionSummaryController,
 );
 
 /**

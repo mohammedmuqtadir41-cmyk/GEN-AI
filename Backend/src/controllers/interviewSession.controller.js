@@ -201,8 +201,65 @@ async function completeInterviewSessionController(req, res) {
   }
 }
 
+async function getInterviewSessionSummaryController(req, res) {
+  try {
+    const { sessionId } = req.params;
+
+    const interviewSession = await interviewSessionModel.findOne({
+      _id: sessionId,
+      user: req.user.id,
+    });
+
+    if (!interviewSession) {
+      return res.status(404).json({
+        message: "Interview session not found",
+      });
+    }
+
+    const answeredQuestions = interviewSession.questionsAsked.filter(
+      (question) => question.answer && question.answer.trim(),
+    );
+
+    const scores = answeredQuestions
+      .map((question) => question.score)
+      .filter((score) => typeof score === "number");
+
+    const totalQuestionsAnswered = answeredQuestions.length;
+
+    const averageScore =
+      scores.length > 0
+        ? scores.reduce((total, score) => total + score, 0) / scores.length
+        : 0;
+
+    const highestScore = scores.length > 0 ? Math.max(...scores) : 0;
+
+    const lowestScore = scores.length > 0 ? Math.min(...scores) : 0;
+
+    return res.status(200).json({
+      message: "Interview session summary fetched successfully",
+
+      summary: {
+        sessionStatus: interviewSession.status,
+        totalQuestionsAnswered,
+        averageScore: Number(averageScore.toFixed(2)),
+        highestScore,
+        lowestScore,
+      },
+    });
+  } catch (error) {
+    console.error("Get Interview Session Summary Error");
+    console.error(error);
+
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
 module.exports = {
   interviewSessionController,
   submitInterviewAnswerController,
-  completeInterviewSessionController
+  completeInterviewSessionController,
+  getInterviewSessionSummaryController
 };
