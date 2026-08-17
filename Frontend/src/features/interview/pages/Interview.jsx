@@ -127,7 +127,6 @@ const RoadMapDay = ({ day }) => (
   </div>
 );
 
-// ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
   const [activeNav, setActiveNav] = useState("technical");
   const navigate = useNavigate();

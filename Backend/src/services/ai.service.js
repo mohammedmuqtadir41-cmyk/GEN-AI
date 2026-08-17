@@ -1,6 +1,6 @@
 const { GoogleGenAI } = require("@google/genai");
-const { z } = require("zod");
-const { zodToJsonSchema } = require("zod-to-json-schema");
+const { z, toJSONSchema } = require("zod");
+// const { zodToJsonSchema } = require("zod-to-json-schema");
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_GEMINI_API_KEY,
@@ -185,7 +185,7 @@ Do not omit properties.
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: zodToJsonSchema(interviewReportSchema),
+      responseJsonSchema: z.toJSONSchema(interviewReportSchema),
     },
   });
 
@@ -237,7 +237,7 @@ async function generateOpeningMockQuestion({ interviewReport }) {
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: zodToJsonSchema(openingQuestionSchema),
+      responseJsonSchema: z.toJSONSchema(openingQuestionSchema),
     },
   });
 
@@ -311,7 +311,7 @@ Do not return a markdown
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: zodToJsonSchema(answerEvaluationSchema),
+      responseJsonSchema: z.toJSONSchema(answerEvaluationSchema),
     },
   });
 
@@ -378,7 +378,7 @@ Do not add extra fields.
     contents: prompt,
     config: {
       responseMimeType:  "application/json",
-      responseJsonSchema: zodToJsonSchema(nextQuestionSchema),
+      responseJsonSchema: z.toJSONSchema(nextQuestionSchema),
     },
   });
 

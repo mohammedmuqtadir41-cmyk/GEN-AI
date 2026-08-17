@@ -19,7 +19,19 @@ const interviewRouter = express.Router();
 interviewRouter.post(
   "/",
   authMiddlewear.authUser,
+
+  (req, res, next) => {
+    console.log("ROUTE 1: Auth finished, multer starting");
+    next();
+  },
+
   upload.single("resume"),
+
+  (req, res, next) => {
+    console.log("ROUTE 2: Multer finished");
+    next();
+  },
+
   interviewController.generateInterviewReportController,
 );
 

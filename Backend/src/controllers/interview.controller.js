@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const pdfParse = require("pdf-parse");
-const generateInterviewReport = require("../services/ai.service");
+const {generateInterviewReport} = require("../services/ai.service");
 const interviewReportModel = require("../models/InterviewRepot.model");
 
 function escapePdfString(value) {
@@ -58,9 +58,11 @@ function buildSimplePdf(title, body) {
 
 async function generateInterviewReportController(req, res) {
   try {
+    console.log("1. Controller started");
+
     const { selfDescription, jobDescription } = req.body;
-    console.log(selfDescription);
-    console.log(jobDescription);
+
+    console.log("2. Request body received");
 
     if (!jobDescription) {
       return res.status(400).json({
@@ -74,15 +76,23 @@ async function generateInterviewReportController(req, res) {
       });
     }
 
+    console.log("3. Before PDF parsing");
+
     const resumeContent = req.file
       ? (await pdfParse(req.file.buffer)).text
       : "";
+
+    console.log("4. Resume ready");
+
+    console.log("5. Calling Gemini");
 
     const interviewReportByAi = await generateInterviewReport({
       resume: resumeContent,
       selfDescription,
       jobDescription,
     });
+
+    console.log("6. Gemini finished");
 
     const interviewReport = await interviewReportModel.create({
       user: req.user.id,
@@ -92,10 +102,13 @@ async function generateInterviewReportController(req, res) {
       ...interviewReportByAi,
     });
 
+    console.log("7. MongoDB saved");
+
     res.status(201).json({
       message: "Interview report generated successfully",
       interviewReport,
     });
+
   } catch (error) {
     console.error("Interview Controller Error");
     console.error(error);
