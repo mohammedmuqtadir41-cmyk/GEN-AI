@@ -5,6 +5,7 @@ import Protected from "./features/auth/Components/protected.jsx";
 import Home from "./features/interview/pages/homepage.jsx";
 import Interview from "./features/interview/pages/Interview.jsx";
 import InterviewSession from "./features/interview/pages/InterviewSession.jsx";
+import InterviewResults from "./features/interview/pages/InterviewResults.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -48,4 +49,10 @@ export const router = createBrowserRouter([
       </Protected>
     ),
   },
+  {
+    path: "/interview/:interviewId/results",
+    element: (
+      <Protected><InterviewResults/></Protected>
+    )
+  }
 ]);

@@ -257,9 +257,44 @@ async function getInterviewSessionSummaryController(req, res) {
   }
 }
 
+async function getInterviewSessionController(req, res) {
+  try {
+    const { sessionId } = req.params;
+
+    const interviewSession =
+      await interviewSessionModel.findOne({
+        _id: sessionId,
+        user: req.user.id,
+      });
+
+    if (!interviewSession) {
+      return res.status(404).json({
+        message: "Interview session not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Interview session fetched successfully",
+      interviewSession,
+    });
+  } catch (error) {
+    console.error(
+      "Get Interview Session Controller Error"
+    );
+    console.error(error);
+
+    return res.status(error.status || 500).json({
+      success: false,
+      message:
+        error.message || "Internal Server Error",
+    });
+  }
+}
+
 module.exports = {
   interviewSessionController,
   submitInterviewAnswerController,
   completeInterviewSessionController,
-  getInterviewSessionSummaryController
+  getInterviewSessionSummaryController,
+  getInterviewSessionController,
 };

@@ -7,6 +7,7 @@ const {
   submitInterviewAnswerController,
   completeInterviewSessionController,
   getInterviewSessionSummaryController,
+  getInterviewSessionController,
 } = require("../controllers/interviewSession.controller");
 
 const interviewRouter = express.Router();
@@ -96,6 +97,12 @@ interviewRouter.post(
   "/resume/pdf/:id",
   authMiddlewear.authUser,
   interviewController.generateResumePdfController,
+);
+
+interviewRouter.get(
+  "/session/:sessionId",
+  authMiddlewear.authUser,
+  getInterviewSessionController,
 );
 
 module.exports = interviewRouter;
