@@ -6,6 +6,8 @@ const {
   generateNextQuestion,
 } = require("../services/ai.service");
 
+const MAX_QUESTION = 5;
+
 async function interviewSessionController(req, res) {
   try {
     const { interviewReportId } = req.body;
@@ -128,26 +130,39 @@ async function submitInterviewAnswerController(req, res) {
     currentQuestionEntry.feedback = evaluation.feedback;
     currentQuestionEntry.score = evaluation.score;
 
-    const nextQuestion = await generateNextQuestion({
-      interviewReport,
-      questionsAsked: interviewSession.questionsAsked,
-    });
+    const answeredQuestions = interviewSession.questionsAsked.filter(
+      (question) => question.answer && question.answer.trim(),
+    );
 
-    interviewSession.questionsAsked.push({
-      question: nextQuestion,
-      answer: "",
-      feedback: "",
-    });
+    const isCompleted = answeredQuestions.length >= MAX_QUESTION;
 
-    interviewSession.currentQuestion = nextQuestion;
+    if (isCompleted) {
+      interviewSession.status = "completed";
+      interviewSession.currentQuestion = "";
+    } else {
+      const nextQuestion = await generateNextQuestion({
+        interviewReport,
+        questionsAsked: interviewSession.questionsAsked,
+      });
 
-    // await interviewSession.save();
+      interviewSession.questionsAsked.push({
+        question: nextQuestion,
+        answer: "",
+        feedback: "",
+      });
+
+      interviewSession.currentQuestion = nextQuestion;
+    }
 
     await interviewSession.save();
 
     return res.status(200).json({
-      message: "Answer evaluated successfully",
-      evaluation,
+      msg: isCompleted
+        ? "Interview completed successfully"
+        : "Answer evaluated successfully",
+
+      evaluation: { ...evaluation, isCompleted },
+
       interviewSession,
     });
   } catch (error) {
@@ -261,11 +276,10 @@ async function getInterviewSessionController(req, res) {
   try {
     const { sessionId } = req.params;
 
-    const interviewSession =
-      await interviewSessionModel.findOne({
-        _id: sessionId,
-        user: req.user.id,
-      });
+    const interviewSession = await interviewSessionModel.findOne({
+      _id: sessionId,
+      user: req.user.id,
+    });
 
     if (!interviewSession) {
       return res.status(404).json({
@@ -278,15 +292,12 @@ async function getInterviewSessionController(req, res) {
       interviewSession,
     });
   } catch (error) {
-    console.error(
-      "Get Interview Session Controller Error"
-    );
+    console.error("Get Interview Session Controller Error");
     console.error(error);
 
     return res.status(error.status || 500).json({
       success: false,
-      message:
-        error.message || "Internal Server Error",
+      message: error.message || "Internal Server Error",
     });
   }
 }
