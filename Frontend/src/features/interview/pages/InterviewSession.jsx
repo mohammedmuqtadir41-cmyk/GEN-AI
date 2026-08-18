@@ -14,17 +14,18 @@ const InterviewSession = () => {
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState(null);
 
-  const handleSubmitAnswer = () => {
-    const mockResponse = {
-      score: 8,
-      feedback:
-        "Good answer. You explained the project clearly and showed a solid understanding of the architecture. Try to structure your explanation more confidently and mention the technologies used at each stage.",
-    };
+ const handleSubmitAnswer = async () => {
+  try {
+    const data = await submitInterviewAnswer(
+      session._id,
+      answer,
+    );
 
-    console.log("Mock answer response:", mockResponse);
-
-    setFeedback(mockResponse);
-  };
+    console.log("Answer response:", data);
+  } catch (err) {
+    console.error("Submit answer error:", err);
+  }
+};
 
   useEffect(() => {
     const startSession = async () => {
