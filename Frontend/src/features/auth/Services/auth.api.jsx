@@ -21,9 +21,12 @@ export async function register({ username, email, password }) {
       email,
       password,
     });
+
+    localStorage.setItem("token", response.data.token);
+
     return response.data;
   } catch (err) {
-    console.log(err);
+    console.error(err);
     throw err;
   }
 }
@@ -34,9 +37,28 @@ export async function login({ email, password }) {
       email,
       password,
     });
+
+    localStorage.setItem("token", response.data.token);
+
     return response.data;
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    throw err;
+  }
+}
+
+export async function getMe() {
+  try {
+    const response = await api.get("/get-me");
+
+    return response.data;
+  } catch (err) {
+    console.error(
+      "getMe failed:",
+      err.response?.status,
+      err.response?.data,
+    );
+
     throw err;
   }
 }
@@ -44,18 +66,12 @@ export async function login({ email, password }) {
 export async function logout() {
   try {
     const response = await api.get("/logout");
-    return response.data;
-  } catch (err) {
-    console.log(err);
-  }
-}
 
-export async function getMe() {
-  try {
-    const response = await api.get("/get-me");
+    localStorage.removeItem("token");
+
     return response.data;
   } catch (err) {
-    console.log("getMe failed:", err.response?.status, err.response?.data);
+    console.error(err);
     throw err;
   }
 }
