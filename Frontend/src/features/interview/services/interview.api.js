@@ -1,9 +1,13 @@
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"
+
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: BASE_URL,
   withCredentials: true,
 });
+
+const API_URL = `${BASE_URL}/api/interview`
 
 /**
  * @description Service to generate interview report based on user self description, resume and job description.
@@ -63,7 +67,6 @@ export const generateResumePdf = async ({ interviewReportId }) => {
   return response.data;
 };
 
-const API_URL = "http://localhost:3000/api/interview";
 
 export const createInterviewSession = async (interviewReportId) => {
   const response = await fetch(`${API_URL}/session`, {
