@@ -4,7 +4,7 @@ import {
   createInterviewSession,
   submitInterviewAnswer,
 } from "../services/interview.api";
-import "../style/interviewSession.css";
+import "../style/InterviewSession.css";
 
 const InterviewSession = () => {
   const { interviewId } = useParams();
