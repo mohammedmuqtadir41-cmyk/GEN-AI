@@ -2,7 +2,16 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://gen-ai-backend-i7y9.onrender.com/api/auth",
-  withCredentials: true,
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
 });
 
 export async function register({ username, email, password }) {
@@ -46,6 +55,7 @@ export async function getMe() {
     const response = await api.get("/get-me");
     return response.data;
   } catch (err) {
-    console.log(err);
+    console.log("getMe failed:", err.response?.status, err.response?.data);
+    throw err;
   }
 }

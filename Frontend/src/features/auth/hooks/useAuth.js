@@ -2,17 +2,23 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "../auth.context";
 import { login, logout, register, getMe } from "../Services/auth.api";
 
-
 export const useAuth = () => {
   const context = useContext(AuthContext);
   const { user, setUser, loading, setLoading } = context;
 
   const handleLogin = async ({ email, password }) => {
     setLoading(true);
+
     try {
       const data = await login({ email, password });
-      const nextUser = data?.user ?? data;
-      setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
+
+      // Store JWT
+      localStorage.setItem("token", data.token);
+
+      // Store logged-in user
+      const nextUser = data?.user ?? null;
+
+      setUser(nextUser);
     } catch (err) {
       console.log(err);
       throw err;
@@ -37,12 +43,14 @@ export const useAuth = () => {
 
   const handleLogout = async () => {
     setLoading(true);
+
     try {
       await logout();
-      setUser(null);
     } catch (err) {
       console.log(err);
     } finally {
+      localStorage.removeItem("token");
+      setUser(null);
       setLoading(false);
     }
   };

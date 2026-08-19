@@ -1,13 +1,22 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
 });
 
-const API_URL = `${BASE_URL}/api/interview`
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+const API_URL = `${BASE_URL}/api/interview`;
 
 /**
  * @description Service to generate interview report based on user self description, resume and job description.
@@ -67,15 +76,15 @@ export const generateResumePdf = async ({ interviewReportId }) => {
   return response.data;
 };
 
-
 export const createInterviewSession = async (interviewReportId) => {
   const response = await fetch(`${API_URL}/session`, {
     method: "POST",
-    credentials: "include",
 
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
+
     body: JSON.stringify({ interviewReportId }),
   });
 
@@ -88,35 +97,34 @@ export const createInterviewSession = async (interviewReportId) => {
   return data;
 };
 
-export const submitInterviewAnswer = async(sessionId, answer) => {
-    const response = await fetch (`${API_URL}/session/${sessionId}/answer`, 
-        {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({answer}),
-        },
-    );
+export const submitInterviewAnswer = async (sessionId, answer) => {
+  const response = await fetch(`${API_URL}/session/${sessionId}/answer`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({ answer }),
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if(!response.ok){
-        throw new Error (data.msg || "Failed to submit answer")
-    }
+  if (!response.ok) {
+    throw new Error(data.msg || "Failed to submit answer");
+  }
 
-    return data;
-}
+  return data;
+};
 
-export const getInterviewSession = async(sessionId) => {
+export const getInterviewSession = async (sessionId) => {
   const response = await api.get(`/api/interview/session/${sessionId}`);
 
   return response.data;
-}
+};
 
 export const getInterviewSessionSummary = async (sessionId) => {
   const response = await api.get(`/api/interview/session/${sessionId}/summary`);
 
   return response.data;
-}
+};

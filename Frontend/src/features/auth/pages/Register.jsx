@@ -21,17 +21,17 @@ export const Register = () => {
       return;
     }
 
-    try{
-    await handleRegister({
-      username,
-      email,
-      password,
-    });
+    try {
+      await handleRegister({
+        username,
+        email,
+        password,
+      });
 
-    navigate("/");
-  } catch(err){
-    console.error(err)
-  }
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (loading) {
