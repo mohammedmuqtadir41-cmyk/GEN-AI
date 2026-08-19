@@ -2,7 +2,12 @@ const userModel = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const tokenBlacklistModel = require("../models/blacklist.model");
-
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 24 * 60 * 60 * 1000,
+};
 
 /**
  * @name registerUserControleer
@@ -42,11 +47,7 @@ async function registerUserController(req, res) {
     { expiresIn: "1d" },
   );
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  res.cookie("token", token, cookieOptions);
 
   res.status(201).json({
     message: "User registered successfully",
@@ -84,27 +85,23 @@ async function loginUserController(req, res) {
   }
 
   const token = jwt.sign(
-    {id: user._id, username: user.username},
+    { id: user._id, username: user.username },
     process.env.JWT_SECRET,
-    {expiresIn: "1d"}
-);
+    { expiresIn: "1d" },
+  );
 
-res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 24 * 60 * 60 * 1000,
-})
-res.status(200).json({
+  res.cookie("token", token, cookieOptions);
+
+  res.status(200).json({
     message: "User LoggedIn Successfully",
     token,
     user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-    }
-})
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    },
+  });
 }
-
 
 /**
  * @name logoutUserController
@@ -112,26 +109,26 @@ res.status(200).json({
  * @access Public
  */
 
-async function logoutUserController(req, res){
-  const token = req.cookies.token
+async function logoutUserController(req, res) {
+  const token = req.cookies.token;
 
-  if(token){
-    await tokenBlacklistModel.create({token})
+  if (token) {
+    await tokenBlacklistModel.create({ token });
   }
 
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "lax",
-  })
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
 
   res.status(200).json({
-    message: "User logged out successfully"
-  })
+    message: "User logged out successfully",
+  });
 }
 
-async function getMeController(req, res){
-  const user = await userModel.findById(req.user.id)
-
+async function getMeController(req, res) {
+  const user = await userModel.findById(req.user.id);
 
   res.status(200).json({
     message: "User details fetched successfully",
@@ -140,7 +137,7 @@ async function getMeController(req, res){
       username: user.username,
       email: user.email,
     },
-  })
+  });
 }
 
 module.exports = {
