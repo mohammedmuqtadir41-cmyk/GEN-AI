@@ -106,3 +106,14 @@ export const submitInterviewAnswer = async(sessionId, answer) => {
     return data;
 }
 
+export const getInterviewSession = async(sessionId) => {
+  const response = await api.get(`/api/interview/session/${sessionId}`);
+
+  return response.data;
+}
+
+export const getInterviewSessionSummary = async (sessionId) => {
+  const response = await api.get(`/api/interview/session/${sessionId}/summary`);
+
+  return response.data;
+}

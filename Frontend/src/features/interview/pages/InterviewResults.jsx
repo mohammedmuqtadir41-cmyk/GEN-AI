@@ -1,79 +1,64 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import {
+  getInterviewSession,
+  getInterviewSessionSummary,
+} from "../services/interview.api";
 import "../style/interviewResults.css";
-
-const mockResults = {
-  overallScore: 80,
-  performance: "Strong Performance",
-
-  summary:
-    "You demonstrated a solid understanding of full-stack development concepts and explained your project experience clearly. Your strongest areas were practical reasoning and technical understanding. Focus on structuring some answers more clearly and going deeper into backend scalability concepts.",
-
-  strengths: [
-    "Good understanding of full-stack application architecture.",
-    "Strong practical problem-solving approach.",
-    "Clear knowledge of authentication and protected routes.",
-    "Able to connect technical concepts with real projects.",
-  ],
-
-  improvements: [
-    "Structure answers in a clearer step-by-step format.",
-    "Explain backend scalability concepts in more depth.",
-    "Include more technical examples when answering.",
-    "Be more specific when describing project challenges.",
-  ],
-
-  questions: [
-    {
-      question:
-        "Could you walk me through your AI Interview Report Generator project and explain its architecture?",
-      score: 8,
-      feedback:
-        "Good explanation of the overall architecture. You clearly described the backend flow and AI integration. A more structured explanation would make your answer even stronger.",
-    },
-
-    {
-      question:
-        "How do you handle authentication and protect private routes in your application?",
-      score: 7,
-      feedback:
-        "You explained the authentication flow well. You could improve by discussing token verification and how unauthorized requests are handled.",
-    },
-
-    {
-      question:
-        "How would you improve backend performance if your application started receiving a large number of requests?",
-      score: 8,
-      feedback:
-        "Strong practical thinking. Consider discussing caching, rate limiting, and database optimization in more detail.",
-    },
-
-    {
-      question:
-        "What is the difference between client-side rendering and server-side rendering?",
-      score: 9,
-      feedback:
-        "Excellent answer. You clearly explained both rendering approaches and provided good examples of when each one should be used.",
-    },
-
-    {
-      question:
-        "What was the most difficult technical challenge you faced while building your project?",
-      score: 8,
-      feedback:
-        "Good problem-solving explanation. Including the alternative solutions you considered would make the answer more compelling.",
-    },
-  ],
-};
 
 const InterviewResults = () => {
   const navigate = useNavigate();
-  const { interviewId } = useParams();
+  const params = useParams();
+
+  console.log("RESULTS PARAMS:", params);
+
+  const { sessionId } = params;
 
   const [expandedQuestion, setExpandedQuestion] = useState(null);
+  const [session, setSession] = useState(null);
+  const [summary, setSummary] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        console.log("FETCHING WITH sessionId:", sessionId);
+        
+        setLoading(true);
+        setError("");
+
+        const [sessionData, summaryData] = await Promise.all([
+          getInterviewSession(sessionId),
+          getInterviewSessionSummary(sessionId),
+        ]);
+
+        console.log("Interview Session:", sessionData);
+        console.log("Interview Summary:", summaryData);
+
+        setSession(sessionData.interviewSession);
+        setSummary(summaryData.summary);
+      } catch (err) {
+        console.error("Results error:", err);
+
+        setError(err.message || "Failed to load interview results");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sessionId) {
+      fetchResults();
+    }
+  }, [sessionId]);
 
   const handleStartNewInterview = () => {
-    navigate("/");
+    if (!session?.interviewReport) {
+      return;
+    }
+
+    navigate(`/interview/${session.interviewReport}/session`);
   };
 
   const handleBackToDashboard = () => {
@@ -81,225 +66,217 @@ const InterviewResults = () => {
   };
 
   const toggleQuestion = (index) => {
-    setExpandedQuestion((current) =>
-      current === index ? null : index
-    );
+    setExpandedQuestion((current) => (current === index ? null : index));
   };
+
+  if (loading) {
+    return (
+      <main className="interview-results">
+        <section className="results-container">
+          <p>Loading your interview results...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="interview-results">
+        <section className="results-container">
+          <h2>Unable to load results</h2>
+          <p>{error}</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!session || !summary) {
+    return null;
+  }
+
+  const questions = session.questionsAsked.filter(
+    (question) => question.answer && question.answer.trim(),
+  );
+
+  const overallScore = Math.round(summary.averageScore * 10);
+
+  let performance = "Needs Improvement";
+
+  if (summary.averageScore >= 8) {
+    performance = "Strong Performance";
+  } else if (summary.averageScore >= 6) {
+    performance = "Good Performance";
+  } else if (summary.averageScore >= 4) {
+    performance = "Average Performance";
+  }
 
   return (
     <main className="interview-results">
       <section className="results-container">
-
         {/* HEADER */}
 
         <header className="results-header">
-          <p className="results-eyebrow">
-            INTERVIEW COMPLETED
-          </p>
+          <p className="results-eyebrow">INTERVIEW COMPLETED</p>
 
           <h1>Your Interview Results</h1>
 
           <p>
-            Here is a breakdown of your performance and
-            areas you can focus on improving.
+            Here is a breakdown of your performance and areas you can focus on
+            improving.
           </p>
         </header>
-
 
         {/* OVERALL SCORE */}
 
         <section className="overall-score-card">
           <div className="overall-score-card__content">
-            <span className="score-label">
-              OVERALL PERFORMANCE
-            </span>
+            <span className="score-label">OVERALL PERFORMANCE</span>
 
-            <h2>{mockResults.performance}</h2>
+            <h2>{performance}</h2>
 
-            <p>
-              Based on your answers across all interview
-              questions.
-            </p>
+            <p>Based on your answers across all interview questions.</p>
           </div>
 
           <div className="overall-score">
-            <strong>
-              {mockResults.overallScore}
-            </strong>
-
+            <strong>{overallScore}</strong>
             <span>/100</span>
           </div>
         </section>
 
-
         {/* SUMMARY */}
 
         <section className="results-summary-card">
-          <span className="section-label">
-            AI SUMMARY
-          </span>
+          <span className="section-label">INTERVIEW SUMMARY</span>
 
           <h2>Overall Assessment</h2>
 
           <p>
-            {mockResults.summary}
+            You completed {summary.totalQuestionsAnswered} questions with an
+            average score of {summary.averageScore}/10.
           </p>
         </section>
 
-
-        {/* STRENGTHS + IMPROVEMENTS */}
+        {/* PERFORMANCE INSIGHTS */}
 
         <section className="insights-grid">
-
           <div className="insight-card insight-card--strengths">
             <div className="insight-card__header">
-              <div className="insight-icon">
-                💪
-              </div>
+              <div className="insight-icon">💪</div>
 
               <div>
-                <span className="section-label">
-                  WHAT YOU DID WELL
-                </span>
+                <span className="section-label">BEST PERFORMANCE</span>
 
-                <h2>Strengths</h2>
+                <h2>Highest Score</h2>
               </div>
             </div>
 
             <ul>
-              {mockResults.strengths.map((strength) => (
-                <li key={strength}>
-                  <span>✓</span>
-                  {strength}
-                </li>
-              ))}
+              <li>
+                <span>✓</span>
+                Your highest score was{" "}
+                <strong>{summary.highestScore}/10</strong>.
+              </li>
+
+              <li>
+                <span>✓</span>
+                Continue building on the topics where you demonstrated strong
+                understanding.
+              </li>
             </ul>
           </div>
-
 
           <div className="insight-card insight-card--improvements">
             <div className="insight-card__header">
-              <div className="insight-icon">
-                🎯
-              </div>
+              <div className="insight-icon">🎯</div>
 
               <div>
-                <span className="section-label">
-                  AREAS TO IMPROVE
-                </span>
+                <span className="section-label">AREA TO IMPROVE</span>
 
-                <h2>Focus Areas</h2>
+                <h2>Lowest Score</h2>
               </div>
             </div>
 
             <ul>
-              {mockResults.improvements.map((improvement) => (
-                <li key={improvement}>
-                  <span>→</span>
-                  {improvement}
-                </li>
-              ))}
+              <li>
+                <span>→</span>
+                Your lowest score was <strong>{summary.lowestScore}/10</strong>.
+              </li>
+
+              <li>
+                <span>→</span>
+                Review the feedback for lower-scoring answers and practice those
+                topics.
+              </li>
             </ul>
           </div>
-
         </section>
-
 
         {/* QUESTION BREAKDOWN */}
 
         <section className="question-breakdown">
           <div className="question-breakdown__header">
             <div>
-              <span className="section-label">
-                DETAILED ANALYSIS
-              </span>
+              <span className="section-label">DETAILED ANALYSIS</span>
 
               <h2>Question Breakdown</h2>
             </div>
 
-            <span className="question-count">
-              {mockResults.questions.length} Questions
-            </span>
+            <span className="question-count">{questions.length} Questions</span>
           </div>
-
 
           <div className="question-list">
-            {mockResults.questions.map(
-              (item, index) => {
-                const isExpanded =
-                  expandedQuestion === index;
+            {questions.map((item, index) => {
+              const isExpanded = expandedQuestion === index;
 
-                return (
-                  <article
-                    className={`result-question ${
-                      isExpanded
-                        ? "result-question--expanded"
-                        : ""
-                    }`}
-                    key={index}
+              return (
+                <article
+                  className={`result-question ${
+                    isExpanded ? "result-question--expanded" : ""
+                  }`}
+                  key={item._id || index}
+                >
+                  <button
+                    className="result-question__button"
+                    onClick={() => toggleQuestion(index)}
                   >
-                    <button
-                      className="result-question__button"
-                      onClick={() =>
-                        toggleQuestion(index)
-                      }
-                    >
-                      <div className="result-question__number">
-                        {String(index + 1).padStart(
-                          2,
-                          "0"
-                        )}
-                      </div>
+                    <div className="result-question__number">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
 
-                      <div className="result-question__content">
-                        <h3>
-                          {item.question}
-                        </h3>
+                    <div className="result-question__content">
+                      <h3>{item.question}</h3>
 
-                        <span>
-                          Click to view feedback
-                        </span>
-                      </div>
+                      <span>Click to view feedback</span>
+                    </div>
 
-                      <div className="result-question__score">
-                        <strong>
-                          {item.score}
-                        </strong>
+                    <div className="result-question__score">
+                      <strong>{item.score}</strong>
 
-                        <span>/10</span>
-                      </div>
+                      <span>/10</span>
+                    </div>
 
-                      <span className="result-question__arrow">
-                        {isExpanded ? "−" : "+"}
-                      </span>
-                    </button>
+                    <span className="result-question__arrow">
+                      {isExpanded ? "−" : "+"}
+                    </span>
+                  </button>
 
-                    {isExpanded && (
-                      <div className="result-question__feedback">
-                        <span>
-                          AI FEEDBACK
-                        </span>
+                  {isExpanded && (
+                    <div className="result-question__feedback">
+                      <span>AI FEEDBACK</span>
 
-                        <p>
-                          {item.feedback}
-                        </p>
-                      </div>
-                    )}
-                  </article>
-                );
-              }
-            )}
+                      <p>{item.feedback}</p>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
           </div>
         </section>
-
 
         {/* ACTIONS */}
 
         <section className="results-actions">
-          <button
-            className="dashboard-btn"
-            onClick={handleBackToDashboard}
-          >
+          <button className="dashboard-btn" onClick={handleBackToDashboard}>
             ← Back to Dashboard
           </button>
 
@@ -311,7 +288,6 @@ const InterviewResults = () => {
             <span>→</span>
           </button>
         </section>
-
       </section>
     </main>
   );

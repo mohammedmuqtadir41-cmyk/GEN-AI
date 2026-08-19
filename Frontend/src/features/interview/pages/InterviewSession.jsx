@@ -53,10 +53,7 @@ const InterviewSession = () => {
       setSubmitting(true);
       setSubmitError("");
 
-      const data = await submitInterviewAnswer(
-        session._id,
-        answer,
-      );
+      const data = await submitInterviewAnswer(session._id, answer);
 
       console.log("Answer response:", data);
 
@@ -65,7 +62,7 @@ const InterviewSession = () => {
         returns a different response structure.
       */
       setFeedback(data.evaluation);
-      setSession(data.interviewSession)
+      setSession(data.interviewSession);
     } catch (err) {
       console.error("Submit answer error:", err);
       setSubmitError(err.message);
@@ -75,16 +72,31 @@ const InterviewSession = () => {
   };
 
   const handleNextQuestion = () => {
-    setQuestionNumber((previousNumber) =>  previousNumber + 1);
+    setQuestionNumber((previousNumber) => previousNumber + 1);
 
-    setAnswer('');
+    setAnswer("");
     setFeedback(null);
-    setSubmitError('');
+    setSubmitError("");
   };
 
   const handleFinishInterview = () => {
-    navigate(`/interview/${interviewId}/results`);
-  };
+  console.log("SESSION OBJECT:", session);
+  console.log("SESSION ID:", session?._id);
+
+  console.log(
+    "NAVIGATE URL:",
+    `/interview/${interviewId}/session/${session?._id}/results`
+  );
+
+  if (!session?._id) {
+    console.error("Cannot finish interview: session._id is missing");
+    return;
+  }
+
+  navigate(
+    `/interview/${interviewId}/session/${session._id}/results`
+  );
+};
 
   if (loading) {
     return (
@@ -111,24 +123,19 @@ const InterviewSession = () => {
     return null;
   }
 
-  const isInterviewComplete =
-    feedback?.isCompleted === true;
+  const isInterviewComplete = feedback?.isCompleted === true;
 
   return (
     <main className="interview-session">
       <header className="session-header">
         <div>
-          <p className="session-header__eyebrow">
-            AI MOCK INTERVIEW
-          </p>
+          <p className="session-header__eyebrow">AI MOCK INTERVIEW</p>
 
           <h1>Interview Session</h1>
         </div>
 
         <div className="session-progress">
-          <span className="session-progress__label">
-            Question
-          </span>
+          <span className="session-progress__label">Question</span>
 
           <strong>{questionNumber}</strong>
         </div>
@@ -138,14 +145,10 @@ const InterviewSession = () => {
         <section className="question-card">
           <div className="question-card__top">
             <div className="interviewer">
-              <div className="interviewer__avatar">
-                AI
-              </div>
+              <div className="interviewer__avatar">AI</div>
 
               <div>
-                <span className="interviewer__label">
-                  YOUR INTERVIEWER
-                </span>
+                <span className="interviewer__label">YOUR INTERVIEWER</span>
 
                 <h3>AI Interviewer</h3>
               </div>
@@ -156,18 +159,14 @@ const InterviewSession = () => {
             </span>
           </div>
 
-          <h2 className="question-card__text">
-            {session.currentQuestion}
-          </h2>
+          <h2 className="question-card__text">{session.currentQuestion}</h2>
         </section>
 
         {!feedback && (
           <section className="answer-card">
             <div className="answer-card__header">
               <div>
-                <span className="answer-card__label">
-                  YOUR RESPONSE
-                </span>
+                <span className="answer-card__label">YOUR RESPONSE</span>
 
                 <h3>Your Answer</h3>
               </div>
@@ -180,34 +179,22 @@ const InterviewSession = () => {
             <textarea
               className="answer-input"
               value={answer}
-              onChange={(event) =>
-                setAnswer(event.target.value)
-              }
+              onChange={(event) => setAnswer(event.target.value)}
               placeholder="Take your time and explain your answer clearly..."
               disabled={submitting}
             />
 
-            {submitError && (
-              <p className="submit-error">
-                {submitError}
-              </p>
-            )}
+            {submitError && <p className="submit-error">{submitError}</p>}
 
             <div className="answer-card__footer">
-              <p>
-                Take your time and explain your answer clearly.
-              </p>
+              <p>Take your time and explain your answer clearly.</p>
 
               <button
                 className="submit-answer-btn"
                 onClick={handleSubmitAnswer}
-                disabled={
-                  !answer.trim() || submitting
-                }
+                disabled={!answer.trim() || submitting}
               >
-                {submitting
-                  ? "Evaluating..."
-                  : "Submit Answer"}
+                {submitting ? "Evaluating..." : "Submit Answer"}
 
                 {!submitting && <span>→</span>}
               </button>
@@ -232,9 +219,7 @@ const InterviewSession = () => {
               )}
             </div>
 
-            <p className="feedback-text">
-              {feedback.feedback}
-            </p>
+            <p className="feedback-text">{feedback.feedback}</p>
 
             <div className="feedback-actions">
               {isInterviewComplete ? (

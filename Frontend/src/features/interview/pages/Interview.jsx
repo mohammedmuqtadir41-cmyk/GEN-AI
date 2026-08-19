@@ -133,6 +133,10 @@ const Interview = () => {
   const { report, loading, error, getResumePdf } = useInterview();
   const { interviewId } = useParams();
 
+  const handleStartMockInterview = () => {
+    navigate(`/interview/${interviewId}/session`);
+  };
+
   const technicalQuestions =
     report?.technicalQuestions ?? report?.technicalQuestion ?? [];
   const behavioralQuestions =
@@ -297,6 +301,16 @@ const Interview = () => {
               ))}
             </div>
           </div>
+
+          <div className="sidebar-divider" />
+
+          <button
+            type="button"
+            className="button primary-button"
+            onClick={handleStartMockInterview}
+          >
+            Start Mock Interview
+          </button>
         </aside>
       </div>
     </div>
