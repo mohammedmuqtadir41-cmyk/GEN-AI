@@ -3,8 +3,7 @@ import axios from "axios";
 // Create one Axios instance for all backend API requests.
 const api = axios.create({
   baseURL:
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:3000/api",
+    import.meta.env.VITE_API_URL ,
 
   // Allows cookies to be sent if needed.
   withCredentials: true,
