@@ -1,4 +1,4 @@
-import api from "../Services/api";
+import api from "./api";
 
 export async function register({ username, email, password }) {
   try {

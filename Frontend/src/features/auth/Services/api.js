@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://gen-ai-backend-i7y9.onrender.com/api",
+  withCredentials: false,
 });
 
 api.interceptors.request.use(
@@ -10,17 +11,21 @@ api.interceptors.request.use(
 
     console.log("🚀 API REQUEST:", config.url);
     console.log("🔑 TOKEN FOUND:", token);
-    console.log("📦 HEADERS BEFORE:", config.headers);
 
     if (token) {
+      config.headers = config.headers || {};
+
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log("📦 HEADERS AFTER:", config.headers);
+    console.log(
+      "📦 FINAL AUTH HEADER:",
+      config.headers?.Authorization
+    );
 
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
 export default api;
