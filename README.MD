@@ -1,123 +1,247 @@
 # AI Interview Preparation Platform
 
-A full-stack MERN application that generates personalized interview preparation reports using AI. Upload a resume (or write a quick self-description) alongside a target job description, and get a structured report with technical questions, behavioral questions, skill-gap analysis, and a day-by-day preparation plan — grounded entirely in your own background and the role you're targeting.
+A full-stack MERN application that generates personalized interview preparation reports using AI.
 
-## Why this project exists
+Upload your resume or provide a short self-description along with a target job description. The application generates a structured interview preparation report containing technical questions, behavioral questions, skill-gap analysis, and a personalized day-by-day preparation plan.
 
-Most "AI wrapper" projects are a single prompt bolted onto a text box. This one is built around a harder problem: getting an LLM to reliably return **structured, schema-valid data** that a real application can persist, query, and render — not just display as raw text.
+The generated report is based on the user's background and the requirements of the target role.
+
+## Live Demo
+
+- Frontend: https://gen-ai-sepia-nu.vercel.app
+- Backend API: https://gen-ai-backend-i7y9.onrender.com
+
+## Why This Project Exists
+
+Most AI-powered applications simply send a prompt to an LLM and display the returned text.
+
+This project focuses on a more practical problem: generating structured, schema-valid AI output that can safely be stored in a database, queried later, and rendered consistently in the frontend.
+
+The AI response follows a defined schema instead of being treated as unstructured text.
 
 ## Features
 
-- **Cookie-based authentication** — JWT stored in an httpOnly cookie, with a server-side token blacklist so logout actually invalidates the session instead of just deleting a client-side token.
-- **AI-generated interview reports** — resume PDF (parsed server-side) + self-description + job description are combined into a single Gemini API call.
-- **Schema-constrained AI output** — the LLM's JSON schema is generated directly from a Zod schema (`zod-to-json-schema`), passed to the model as `responseJsonSchema`, and the raw response is re-validated against that same Zod schema before it's ever written to MongoDB. If the model returns something malformed, it's rejected before it reaches the database.
-- **Report history** — every generated report is persisted per-user and retrievable by ID or listed chronologically.
-- **Downloadable resume PDF** — generate a PDF export of a stored report.
-- **Protected routes** — the frontend gates authenticated pages behind a route guard that restores session state via a `/get-me` check on load.
+- JWT-based authentication with protected API routes
+- Secure password hashing using bcrypt
+- Automatic JWT attachment through a centralized Axios API client
+- AI-generated personalized interview preparation reports
+- Resume PDF upload and server-side text extraction
+- Self-description and job-description based analysis
+- Schema-constrained AI responses using Zod
+- AI output validation before storing data in MongoDB
+- Interview report history for each authenticated user
+- Fetch individual reports by ID
+- Download generated reports as PDF
+- Protected frontend routes with session restoration
+- Centralized authentication and interview state management
 
 ## Upcoming Features
 
-* **AI Mock Interviews** — interactive, text-based mock interview sessions where the AI asks questions, evaluates candidate answers, and provides scores and personalized feedback.
-* **Adaptive Follow-up Questions** — dynamically adjust follow-up questions based on the candidate's previous answers, strengths, and weaknesses.
-* **Resume & Job Description Matching** — analyze the resume against a target job description to identify matched skills, missing skills, and relevant evidence from the candidate's background.
-* **ATS-Style Resume Analysis** — provide resume scoring, missing keywords, and actionable suggestions for improving alignment with a target role.
-* **Interview Progress Tracking** — track interview scores, weak areas, preparation progress, and performance across multiple interview sessions.
-* **Personalized Preparation Tracking** — turn the generated preparation plan into an interactive checklist with task completion and progress tracking.
-* **AI-Powered Answer Evaluation** — evaluate technical and behavioral answers for accuracy, completeness, clarity, and communication.
-* **Voice-Based Mock Interviews** — support speech-to-text interview sessions for a more realistic interview experience.
-* **Production Improvements** — add automated testing, rate limiting, structured logging, security hardening, caching, Docker deployment, and CI/CD.
+- **AI Mock Interviews**  
+  Interactive text-based mock interview sessions where the AI asks questions, evaluates answers, and provides personalized feedback.
 
+- **Adaptive Follow-up Questions**  
+  Dynamically generated follow-up questions based on previous answers, strengths, and weaknesses.
 
-## Tech stack
+- **Resume and Job Description Matching**  
+  Analyze how well a resume matches a target job description and identify matched and missing skills.
 
-**Backend**
-- Node.js + Express 5
-- MongoDB + Mongoose
-- JWT (`jsonwebtoken`) + `bcryptjs` for auth
-- Google Gemini (`@google/genai`) for report generation
-- Zod + `zod-to-json-schema` for request/response schema validation
-- `multer` for resume file uploads, `pdf-parse` for text extraction
-- `cookie-parser`, `cors`
+- **ATS-Style Resume Analysis**  
+  Resume scoring, keyword analysis, and actionable suggestions for improving alignment with a target role.
 
-**Frontend**
-- React 19 + Vite
-- React Router 7
-- Axios (cookie-credentialed requests)
-- Context API + custom hooks (`useAuth`, `useInterview`) for state management
+- **Interview Progress Tracking**  
+  Track interview scores, weak areas, preparation progress, and performance across multiple sessions.
+
+- **Personalized Preparation Tracking**  
+  Turn generated preparation plans into interactive checklists with progress tracking.
+
+- **AI-Powered Answer Evaluation**  
+  Evaluate technical and behavioral answers for accuracy, completeness, clarity, and communication.
+
+- **Voice-Based Mock Interviews**  
+  Support speech-to-text interview sessions for a more realistic interview experience.
+
+- **Production Improvements**  
+  Add automated testing, rate limiting, structured logging, security hardening, caching, Docker support, and CI/CD.
+
+## Tech Stack
+
+### Frontend
+
+- React 19
+- Vite
+- React Router
+- Axios
+- Context API
+- Custom Hooks
 - SCSS
 
-## Project structure
+### Backend
 
-```
-Backend/
-  src/
-    app.js                  # Express app, middleware, route mounting
-    config/database.js      # MongoDB connection
-    controllers/            # auth.controller.js, interview.controller.js
-    middlewears/             # auth.middleware.js, file.middlewear.js
-    models/                  # user, interview report, token blacklist
-    routes/                  # auth.routes.js, interview.routes.js
-    services/ai.service.js   # Gemini call + Zod schema + prompt
-  server.js
+- Node.js
+- Express
+- MongoDB
+- Mongoose
+- JSON Web Tokens
+- bcryptjs
+- Google Gemini API
+- Zod
+- zod-to-json-schema
+- Multer
+- pdf-parse
+- cookie-parser
+- CORS
 
-Frontend/
-  src/
-    features/
-      auth/                  # context, hooks, pages, api service
-      interview/              # context, hooks, pages, api service
-    app.routes.jsx
-    App.jsx
-```
+## Authentication Flow
 
-## Getting started
+The application uses JWT authentication.
 
-### Prerequisites
-- Node.js ≥ 18
-- A MongoDB connection string
-- A Google Gemini API key
+After a successful login:
 
-### Backend setup
+1. The backend generates a JWT.
+2. The frontend stores the token locally.
+3. The centralized Axios API client automatically attaches the token.
+4. Protected requests include the following header:
 
-```bash
+```text
+Authorization: Bearer <token>
+
+GEN-AI/
+│
+├── Backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── database.js
+│   │   │
+│   │   ├── controllers/
+│   │   │   ├── auth.controller.js
+│   │   │   └── interview.controller.js
+│   │   │
+│   │   ├── middlewears/
+│   │   │   ├── auth.middleware.js
+│   │   │   ├── error.middleware.js
+│   │   │   └── file.middleware.js
+│   │   │
+│   │   ├── models/
+│   │   │   ├── user.model.js
+│   │   │   ├── interview.model.js
+│   │   │   └── blacklist.model.js
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── auth.routes.js
+│   │   │   └── interview.routes.js
+│   │   │
+│   │   ├── services/
+│   │   │   └── ai.service.js
+│   │   │
+│   │   └── app.js
+│   │
+│   ├── server.js
+│   ├── package.json
+│   └── .env.example
+│
+├── Frontend/
+│   ├── src/
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   │   ├── api/
+│   │   │   │   ├── context/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── pages/
+│   │   │   │
+│   │   │   └── interview/
+│   │   │       ├── api/
+│   │   │       ├── context/
+│   │   │       ├── hooks/
+│   │   │       └── pages/
+│   │   │
+│   │   ├── components/
+│   │   ├── app.routes.jsx
+│   │   └── App.jsx
+│   │
+│   ├── package.json
+│   └── .env.example
+│
+└── README.md
+
+
+Getting Started
+Prerequisites
+
+Make sure you have:
+
+Node.js 18 or later
+MongoDB database
+Google Gemini API key
+
+Sample environment configuration files are included in the project.
+
+Clone the Repository
+git clone https://github.com/mohammedmuqtadir41-cmyk/GEN-AI.git
+cd GEN-AI
+Backend
 cd Backend
 npm install
-```
-
-Create a `.env` file in `Backend/`:
-
-```env
-PORT=3000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-GOOGLE_GEMINI_API_KEY=your_gemini_api_key
-```
-
-```bash
 npm run dev
-```
 
-The API runs on `http://localhost:3000`.
+The backend runs on:
 
-### Frontend setup
+http://localhost:3000
+Frontend
 
-```bash
+Open another terminal:
+
 cd Frontend
 npm install
 npm run dev
+
+The frontend runs on:
+
+http://localhost:5173
+
+
+
+API Overview
+Method	Endpoint	Description	Authentication
+POST	/api/auth/register	Create a new user account	Public
+POST	/api/auth/login	Authenticate user and generate JWT	Public
+POST	/api/auth/logout	Log out the authenticated user	Private
+GET	/api/auth/get-me	Get the currently authenticated user	Private
+POST	/api/interview	Generate a new interview preparation report	Private
+GET	/api/interview	Get all reports for the authenticated user	Private
+GET	/api/interview/report/:id	Get a specific interview report	Private
+POST	/api/interview/resume/pdf/:id	Generate and download a report PDF	Private
+Deployment
+
+The application is deployed using:
+
+Frontend: Vercel
+Backend: Render
+Database: MongoDB Atlas
+
+
+Future Improvements
+
+The project currently focuses on the core interview preparation workflow.
+
+Future development will focus on:
+
+Automated testing
+Rate limiting
+Better error handling
+Structured logging
+Security improvements
+Caching
+Docker support
+CI/CD pipelines
+AI mock interviews
+Resume analysis
+Progress tracking
+
+
+
+Author:
+Mohammed Muqthadir Ahmed
+
+GitHub: https://github.com/mohammedmuqtadir41-cmyk
 ```
-
-The app runs on `http://localhost:5173`.
-
-## API overview
-
-| Method | Endpoint | Description | Auth |
-|---|---|---|---|
-| POST | `/api/auth/register` | Create an account | Public |
-| POST | `/api/auth/login` | Log in, sets httpOnly cookie | Public |
-| GET | `/api/auth/logout` | Log out, blacklists the token | Public |
-| GET | `/api/auth/get-me` | Restore session from cookie | Private |
-| POST | `/api/interview` | Generate a new interview report (multipart: resume + fields) | Private |
-| GET | `/api/interview` | List all reports for the logged-in user | Private |
-| GET | `/api/interview/report/:id` | Fetch a single report | Private |
-| POST | `/api/interview/resume/pdf/:id` | Generate a downloadable PDF for a report | Private |
-

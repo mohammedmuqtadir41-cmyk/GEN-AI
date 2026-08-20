@@ -1,31 +1,30 @@
 import axios from "axios";
 
+// Create one Axios instance for all backend API requests.
 const api = axios.create({
-  baseURL: "https://gen-ai-backend-i7y9.onrender.com/api",
-  withCredentials: false,
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:3000/api",
+
+  // Allows cookies to be sent if needed.
+  withCredentials: true,
 });
 
+// Automatically attach JWT to every request.
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
+    // Add the JWT only when a token exists.
     if (token) {
-      if (typeof config.headers?.set === "function") {
-        // Axios v1 AxiosHeaders — this actually registers the
-        // header in the internal map the adapter serializes from.
-        config.headers.set("Authorization", `Bearer ${token}`);
-      } else {
-        // Fallback for plain-object headers (older axios / edge cases)
-        config.headers = {
-          ...(config.headers || {}),
-          Authorization: `Bearer ${token}`,
-        };
-      }
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 export default api;
