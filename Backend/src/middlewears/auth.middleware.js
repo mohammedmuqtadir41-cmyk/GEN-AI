@@ -3,6 +3,11 @@ const tokenBlacklistModel = require("../models/blacklist.model");
 
 async function authUser(req, res, next) {
   try {
+    console.log("========== AUTH DEBUG ==========");
+    console.log("METHOD:", req.method);
+    console.log("URL:", req.originalUrl);
+    console.log("HEADERS:", req.headers);
+    console.log("AUTH HEADER:", req.headers.authorization);
     let token;
 
     // 1. Try Authorization header first
