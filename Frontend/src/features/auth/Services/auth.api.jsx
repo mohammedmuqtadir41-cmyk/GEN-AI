@@ -1,22 +1,8 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: "https://gen-ai-backend-i7y9.onrender.com/api/auth",
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
+import api from "../Services/api";
 
 export async function register({ username, email, password }) {
   try {
-    const response = await api.post("/register", {
+    const response = await api.post("/auth/register", {
       username,
       email,
       password,
@@ -33,7 +19,7 @@ export async function register({ username, email, password }) {
 
 export async function login({ email, password }) {
   try {
-    const response = await api.post("/login", {
+    const response = await api.post("/auth/login", {
       email,
       password,
     });
@@ -49,7 +35,7 @@ export async function login({ email, password }) {
 
 export async function getMe() {
   try {
-    const response = await api.get("/get-me");
+    const response = await api.get("/auth/get-me");
 
     return response.data;
   } catch (err) {
@@ -65,7 +51,7 @@ export async function getMe() {
 
 export async function logout() {
   try {
-    const response = await api.get("/logout");
+    const response = await api.get("/auth/logout");
 
     localStorage.removeItem("token");
 
