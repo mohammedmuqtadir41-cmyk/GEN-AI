@@ -9,19 +9,19 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
-    console.log("🚀 API REQUEST:", config.url);
-    console.log("🔑 TOKEN FOUND:", token);
-
     if (token) {
-      config.headers = config.headers || {};
-
-      config.headers.Authorization = `Bearer ${token}`;
+      if (typeof config.headers?.set === "function") {
+        // Axios v1 AxiosHeaders — this actually registers the
+        // header in the internal map the adapter serializes from.
+        config.headers.set("Authorization", `Bearer ${token}`);
+      } else {
+        // Fallback for plain-object headers (older axios / edge cases)
+        config.headers = {
+          ...(config.headers || {}),
+          Authorization: `Bearer ${token}`,
+        };
+      }
     }
-
-    console.log(
-      "📦 FINAL AUTH HEADER:",
-      config.headers?.Authorization
-    );
 
     return config;
   },
