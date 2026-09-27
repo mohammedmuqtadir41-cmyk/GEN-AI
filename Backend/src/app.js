@@ -18,6 +18,8 @@ const allowedOrigins = [
   "https://gen-d2dqe8wtf-mohammedmuqtadir41-cmyks-projects.vercel.app",
 ];
 
+
+
 // Configure CORS so the backend accepts requests
 // only from our allowed frontend applications.
 app.use(
@@ -39,6 +41,13 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Backend is running",
+  });
+});
 
 // Authentication routes.
 app.use("/api/auth", authRoutes);

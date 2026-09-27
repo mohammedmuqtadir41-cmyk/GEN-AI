@@ -1,40 +1,76 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../auth.context";
-import { login, logout, register, getMe } from "../Services/auth.api";
+import {
+  login,
+  logout,
+  register,
+} from "../Services/auth.api";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  const { user, setUser, loading, setLoading } = context;
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used inside an AuthProvider"
+    );
+  }
+
+  const {
+    user,
+    setUser,
+    loading,
+    setLoading,
+  } = context;
 
   const handleLogin = async ({ email, password }) => {
     setLoading(true);
 
     try {
-      const data = await login({ email, password });
+      const data = await login({
+        email,
+        password,
+      });
 
-      // Store JWT
       localStorage.setItem("token", data.token);
 
-      // Store logged-in user
       const nextUser = data?.user ?? null;
 
       setUser(nextUser);
+
+      return data;
     } catch (err) {
-      console.log(err);
+      console.error("Login failed:", err);
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRegister = async ({ username, email, password }) => {
+  const handleRegister = async ({
+    username,
+    email,
+    password,
+  }) => {
     setLoading(true);
+
     try {
-      const data = await register({ username, email, password });
+      const data = await register({
+        username,
+        email,
+        password,
+      });
+
       const nextUser = data?.user ?? data;
-      setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
+
+      setUser(
+        nextUser && typeof nextUser === "object"
+          ? nextUser
+          : null
+      );
+
+      return data;
     } catch (err) {
-      console.error(err);
+      console.error("Registration failed:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -47,7 +83,7 @@ export const useAuth = () => {
     try {
       await logout();
     } catch (err) {
-      console.log(err);
+      console.error("Logout failed:", err);
     } finally {
       localStorage.removeItem("token");
       setUser(null);
@@ -55,35 +91,11 @@ export const useAuth = () => {
     }
   };
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const getAndSetUser = async () => {
-      try {
-        const data = await getMe();
-
-        if (!isMounted) return;
-
-        const nextUser = data?.user ?? data;
-        setUser(nextUser && typeof nextUser === "object" ? nextUser : null);
-      } catch (err) {
-        console.error("Failed to restore session", err);
-        if (isMounted) {
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    getAndSetUser();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return { user, loading, handleLogin, handleLogout, handleRegister };
+  return {
+    user,
+    loading,
+    handleLogin,
+    handleLogout,
+    handleRegister,
+  };
 };
