@@ -20,6 +20,7 @@ export const useAuth = () => {
     setUser,
     loading,
     setLoading,
+    initializing,
   } = context;
 
   const handleLogin = async ({ email, password }) => {
@@ -94,6 +95,7 @@ export const useAuth = () => {
   return {
     user,
     loading,
+    initializing,
     handleLogin,
     handleLogout,
     handleRegister,

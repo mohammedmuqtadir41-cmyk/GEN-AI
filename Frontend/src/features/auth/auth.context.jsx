@@ -5,7 +5,12 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  // Loading for login/register/logout actions
+  const [loading, setLoading] = useState(false);
+
+  // Loading only while checking an existing session
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -13,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
       // No token means there is no session to restore.
       if (!token) {
-        setLoading(false);
+        setInitializing(false);
         return;
       }
 
@@ -30,11 +35,10 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error("Failed to restore session:", error);
 
-        // Remove invalid/expired token.
         localStorage.removeItem("token");
         setUser(null);
       } finally {
-        setLoading(false);
+        setInitializing(false);
       }
     };
 
@@ -48,6 +52,7 @@ export const AuthProvider = ({ children }) => {
         setUser,
         loading,
         setLoading,
+        initializing,
       }}
     >
       {children}
