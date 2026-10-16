@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const pdfParse = require("pdf-parse");
-const {generateInterviewReport} = require("../services/ai.service");
+const { generateInterviewReport } = require("../services/ai.service");
 const interviewReportModel = require("../models/InterviewRepot.model");
 
 function escapePdfString(value) {
@@ -78,9 +78,30 @@ async function generateInterviewReportController(req, res) {
 
     console.log("3. Before PDF parsing");
 
-    const resumeContent = req.file
-      ? (await pdfParse(req.file.buffer)).text
-      : "";
+    let resumeContent = "";
+
+    if (req.file) {
+      try {
+        const parsedPdf = await pdfParse(req.file.buffer);
+        resumeContent = parsedPdf.text?.trim() || "";
+
+        if (!resumeContent) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "No readable text was found in the PDF. Try exporting your resume as a new PDF.",
+          });
+        }
+      } catch (error) {
+        console.error("Resume PDF parsing failed:", error.message);
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "Unable to read this resume PDF. Please export it again or upload another PDF.",
+        });
+      }
+    }
 
     console.log("4. Resume ready");
 
@@ -108,7 +129,6 @@ async function generateInterviewReportController(req, res) {
       message: "Interview report generated successfully",
       interviewReport,
     });
-
   } catch (error) {
     console.error("Interview Controller Error");
     console.error(error);

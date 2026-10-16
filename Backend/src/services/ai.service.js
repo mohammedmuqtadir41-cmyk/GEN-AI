@@ -6,6 +6,30 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_GEMINI_API_KEY,
 });
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function generateContentWithRetry(params, maxAttempts = 3) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (error) {
+      const status = Number(error.status ?? error.code);
+      const retryable = [429, 500, 502, 503, 504].includes(status);
+
+      if (!retryable || attempt === maxAttempts) {
+        throw error;
+      }
+
+      const delay = 1000 * 2 ** (attempt - 1) + Math.random() * 300;
+      console.warn(
+        `Gemini request failed with ${status}. Retrying ${attempt}/${maxAttempts} in ${Math.round(delay)}ms.`,
+      );
+
+      await sleep(delay);
+    }
+  }
+}
+
 const interviewReportSchema = z.object({
   matchScore: z
     .number()
@@ -180,7 +204,7 @@ Do not flatten arrays.
 Do not omit properties.
 `;
 
-  const response = await ai.models.generateContent({
+  const response = await generateContentWithRetry({
     model: "gemini-3.5-flash",
     contents: prompt,
     config: {
