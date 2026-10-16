@@ -1,0 +1,57 @@
+/* Global layering for the Soffit WebGL background. */
+.soffit-app-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background: #062334;
+}
+
+.soffit-app-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: #062334 !important;
+}
+
+/* Replace the old CSS-only aurora blobs once the shader is active. */
+body::before,
+body::after {
+  display: none !important;
+  animation: none !important;
+}
+
+/* Transparent page shells allow the fixed canvas to show through. */
+.auth-page,
+.home,
+.interview-page,
+.interview-session,
+.interview-results,
+.loading-screen {
+  background: transparent !important;
+}
+
+/* Keep translucent panels above the animated field. */
+.auth-card,
+.card,
+.report-card,
+.interview-nav,
+.interview-sidebar,
+.match-score,
+.results-container {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soffit-background__canvas {
+    animation: none !important;
+  }
+}
